@@ -149,11 +149,18 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
 
   const handlePost = () => {
     haptic.success();
-    const visibility = isPublic ? "public" : "friends only";
-    toast({
-      title: "Post shared!",
-      description: `Your movie review has been posted as ${visibility}.`,
-    });
+    
+    // Close dialog first
+    onOpenChange(false);
+    
+    // Show toast at bottom left after a short delay
+    setTimeout(() => {
+      toast({
+        title: "Post added!",
+        description: `Your review has been shared with ${isPublic ? "everyone" : "friends only"}.`,
+      });
+    }, 300);
+    
     // Reset form
     setStep("search");
     setSearchQuery("");
@@ -163,12 +170,11 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
     setTaggedFriends([]);
     setPhotos([]);
     setIsPublic(true);
-    onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
             {step === "search" ? "What did you watch?" : "Share your thoughts"}
@@ -229,10 +235,11 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
             </ScrollArea>
           </div>
         ) : (
-          <ScrollArea className="flex-1">
-            <div className="space-y-6 pr-4">
-              {/* Selected Movie */}
-              <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg">
+          <div className="flex flex-col h-full">
+            <ScrollArea className="flex-1 max-h-[500px]">
+              <div className="space-y-6 pr-4">
+                {/* Selected Movie */}
+                <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg">
                 <img
                   src={selectedMovie?.poster}
                   alt={selectedMovie?.title}
@@ -394,19 +401,22 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                       setIsPublic(checked);
                     }}
                   />
+                  </div>
                 </div>
               </div>
+            </ScrollArea>
 
-              {/* Post Button */}
+            {/* Post Button - Fixed at Bottom */}
+            <div className="border-t border-border pt-4 mt-4">
               <Button
                 onClick={handlePost}
-                className="w-full"
+                className="w-full h-12 text-lg neon-glow-primary"
                 disabled={!rating || !review}
               >
                 Post to Feed
               </Button>
             </div>
-          </ScrollArea>
+          </div>
         )}
       </DialogContent>
     </Dialog>

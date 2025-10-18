@@ -1,12 +1,16 @@
 import MovieCard from "@/components/MovieCard";
 import ReviewCard from "@/components/ReviewCard";
 import BottomNav from "@/components/BottomNav";
+import AddPostDialog from "@/components/AddPostDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, TrendingUp, Users, Search, Film, Calendar, Bell } from "lucide-react";
+import { Sparkles, TrendingUp, Users, Search, Film, Calendar, Bell, Plus } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useState } from "react";
 
 const Index = () => {
+  const [isAddPostOpen, setIsAddPostOpen] = useState(false);
+
   const trendingMovies = [
     {
       title: "The Lighthouse",
@@ -50,6 +54,12 @@ const Index = () => {
       likes: 234,
       comments: 42,
       moviePoster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop",
+      taggedFriends: [
+        { name: "Sarah Johnson", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" },
+      ],
+      photos: [
+        "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=300&fit=crop",
+      ],
     },
     {
       userName: "Sam Rivera",
@@ -199,6 +209,17 @@ const Index = () => {
           ))}
         </div>
       </section>
+
+      {/* Floating Add Post Button */}
+      <Button
+        onClick={() => setIsAddPostOpen(true)}
+        className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-40"
+        size="icon"
+      >
+        <Plus className="w-6 h-6" />
+      </Button>
+
+      <AddPostDialog open={isAddPostOpen} onOpenChange={setIsAddPostOpen} />
 
       <BottomNav />
 

@@ -1,7 +1,8 @@
-import { Heart, MessageCircle, Share2, Star } from "lucide-react";
+import { Heart, MessageCircle, Share2, Star, Smile } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import VibeTag from "./VibeTag";
 
 interface ReviewCardProps {
@@ -15,6 +16,8 @@ interface ReviewCardProps {
   likes: number;
   comments: number;
   moviePoster: string;
+  taggedFriends?: { name: string; avatar: string }[];
+  photos?: string[];
 }
 
 const ReviewCard = ({
@@ -28,7 +31,30 @@ const ReviewCard = ({
   likes,
   comments,
   moviePoster,
+  taggedFriends = [],
+  photos = [],
 }: ReviewCardProps) => {
+  const [isLiked, setIsLiked] = useState(false);
+  const [showReactions, setShowReactions] = useState(false);
+  const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
+  const [likeCount, setLikeCount] = useState(likes);
+
+  const reactions = ["❤️", "😂", "😮", "😢", "😍", "🔥"];
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+  };
+
+  const handleReaction = (reaction: string) => {
+    setSelectedReaction(reaction);
+    setShowReactions(false);
+    if (!isLiked) {
+      setIsLiked(true);
+      setLikeCount(likeCount + 1);
+    }
+  };
+
   return (
     <Card className="bg-card border-border p-6 hover:border-primary/30 transition-all duration-300">
       <div className="flex items-start gap-4 mb-4">
@@ -75,11 +101,70 @@ const ReviewCard = ({
 
       <p className="text-foreground/90 mb-4 leading-relaxed">{review}</p>
 
+      {/* Tagged Friends */}
+      {taggedFriends.length > 0 && (
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-sm text-muted-foreground">Watched with:</span>
+          {taggedFriends.map((friend, index) => (
+            <div key={index} className="flex items-center gap-1">
+              <Avatar className="w-6 h-6 border border-border">
+                <AvatarImage src={friend.avatar} />
+                <AvatarFallback>{friend.name[0]}</AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium">{friend.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Photos */}
+      {photos.length > 0 && (
+        <div className="flex gap-2 mb-4 overflow-x-auto">
+          {photos.map((photo, index) => (
+            <img
+              key={index}
+              src={photo}
+              alt={`Photo ${index + 1}`}
+              className="w-32 h-32 object-cover rounded-lg border border-border"
+            />
+          ))}
+        </div>
+      )}
+
       <div className="flex items-center gap-6 pt-4 border-t border-border">
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary gap-2">
-          <Heart className="w-4 h-4" />
-          {likes}
-        </Button>
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`gap-2 ${isLiked ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+            onClick={handleLike}
+          >
+            <Heart className={`w-4 h-4 ${isLiked ? "fill-primary" : ""}`} />
+            {likeCount}
+            {selectedReaction && <span className="ml-1">{selectedReaction}</span>}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-primary absolute -top-2 left-12"
+            onClick={() => setShowReactions(!showReactions)}
+          >
+            <Smile className="w-4 h-4" />
+          </Button>
+          {showReactions && (
+            <div className="absolute bottom-full left-0 mb-2 bg-card border border-border rounded-full shadow-lg p-2 flex gap-1">
+              {reactions.map((reaction) => (
+                <button
+                  key={reaction}
+                  onClick={() => handleReaction(reaction)}
+                  className="text-xl hover:scale-125 transition-transform"
+                >
+                  {reaction}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary gap-2">
           <MessageCircle className="w-4 h-4" />
           {comments}

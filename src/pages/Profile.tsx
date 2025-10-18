@@ -45,8 +45,8 @@ const Profile = () => {
     bio: "all my movie picks finally have a purpose",
     memberSince: "February 2025",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-    followers: 24,
-    following: 23,
+    followers: 3,
+    following: 2,
     watched: 58,
     watchlist: 12,
     favorites: 8,
@@ -196,7 +196,7 @@ const Profile = () => {
           </div>
 
           {/* Stats */}
-          <div className="flex justify-center gap-12 mb-8">
+          <div className="flex justify-center gap-8 mb-8">
             <button
               onClick={() => {
                 haptic.light();
@@ -205,7 +205,7 @@ const Profile = () => {
               className="text-center cursor-pointer hover:opacity-70 transition-opacity"
             >
               <div className="text-2xl font-bold text-foreground">{profileData.followers}</div>
-              <div className="text-sm text-muted-foreground">Followers</div>
+              <div className="text-sm text-muted-foreground">Followers <span className="text-primary">(friends)</span></div>
             </button>
             <button
               onClick={() => {
@@ -215,8 +215,12 @@ const Profile = () => {
               className="text-center cursor-pointer hover:opacity-70 transition-opacity"
             >
               <div className="text-2xl font-bold text-foreground">{profileData.following}</div>
-              <div className="text-sm text-muted-foreground">Following</div>
+              <div className="text-sm text-muted-foreground">Following <span className="text-primary">(friends)</span></div>
             </button>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-foreground">4 weeks</div>
+              <div className="text-sm text-muted-foreground">Streak</div>
+            </div>
           </div>
         </div>
 
@@ -251,16 +255,6 @@ const Profile = () => {
               </Link>
             </div>
 
-        {/* Stats Cards */}
-        <div className="mb-8">
-          <Card className="p-6 bg-card border-border">
-            <div className="flex items-center gap-3 mb-2">
-              <Flame className="w-6 h-6 text-accent" />
-              <span className="text-sm text-muted-foreground">Current Streak</span>
-            </div>
-            <div className="text-2xl font-bold text-foreground">4 weeks</div>
-          </Card>
-        </div>
 
         {/* Watch Year Wrapped Section */}
         <Card className="p-6 mb-8 bg-gradient-primary/10 border-primary/30 neon-card">

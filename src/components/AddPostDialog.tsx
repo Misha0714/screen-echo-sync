@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Star, UserPlus, X, Image as ImageIcon, Lock, Globe, CalendarIcon } from "lucide-react";
+import { Search, Star, UserPlus, X, Image as ImageIcon, CalendarIcon, ChevronRight, Lock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
@@ -118,6 +118,9 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
   const [photos, setPhotos] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(true);
   const [watchedDate, setWatchedDate] = useState<Date>(new Date());
+  const [showReview, setShowReview] = useState(false);
+  const [showPhotos, setShowPhotos] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const filteredMovies = mockMovies.filter(movie =>
     movie.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -155,10 +158,8 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
   const handlePost = () => {
     haptic.success();
     
-    // Close dialog first
     onOpenChange(false);
     
-    // Show toast at bottom left after a short delay
     setTimeout(() => {
       toast({
         title: "Post added!",
@@ -176,259 +177,280 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
     setPhotos([]);
     setIsPublic(true);
     setWatchedDate(new Date());
+    setShowReview(false);
+    setShowPhotos(false);
+    setShowDatePicker(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>
-            {step === "search" ? "What did you watch?" : "Share your thoughts"}
-          </DialogTitle>
-        </DialogHeader>
-
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0 gap-0">
         {step === "search" ? (
-          <div className="flex flex-col gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search for a movie or TV show..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            <ScrollArea className="h-[400px]">
-              <div className="space-y-2">
-                {filteredMovies.map((movie) => (
-                  <button
-                    key={movie.id}
-                    onClick={() => handleSelectMovie(movie)}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors neon-border-subtle"
-                  >
-                    <img
-                      src={movie.poster}
-                      alt={movie.title}
-                      className="w-12 h-18 object-cover rounded poster-glow"
-                    />
-                    <div className="text-left flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-semibold">{movie.title}</p>
-                        <Badge variant="outline" className="text-xs">
-                          {movie.type === "tv" ? "TV" : "Movie"}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-1">{movie.year} • {movie.director}</p>
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {movie.genres.slice(0, 2).map((genre) => (
-                          <Badge key={genre} variant="secondary" className="text-xs">
-                            {genre}
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Star className="w-3 h-3 text-primary fill-primary" />
-                          {movie.avgRating}
-                        </span>
-                        <span>{movie.reviewCount} reviews</span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+          <>
+            <DialogHeader className="px-6 pt-6 pb-4">
+              <DialogTitle>What did you watch?</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4 px-6 pb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search for a movie or TV show..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-            </ScrollArea>
-          </div>
+
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-2">
+                  {filteredMovies.map((movie) => (
+                    <button
+                      key={movie.id}
+                      onClick={() => handleSelectMovie(movie)}
+                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                    >
+                      <img
+                        src={movie.poster}
+                        alt={movie.title}
+                        className="w-12 h-18 object-cover rounded"
+                      />
+                      <div className="text-left flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-semibold">{movie.title}</p>
+                          <Badge variant="outline" className="text-xs">
+                            {movie.type === "tv" ? "TV" : "Movie"}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{movie.year} • {movie.director}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          </>
         ) : (
           <div className="flex flex-col h-full">
-            <ScrollArea className="flex-1 max-h-[540px]">
-              <div className="space-y-4 pr-4 pb-2">
-                {/* Selected Movie */}
-                <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg">
+            {/* Movie Header */}
+            <div className="p-6 border-b">
+              <div className="flex items-center gap-3">
                 <img
                   src={selectedMovie?.poster}
                   alt={selectedMovie?.title}
                   className="w-16 h-24 object-cover rounded"
                 />
-                <div>
-                  <p className="font-semibold">{selectedMovie?.title}</p>
-                  <p className="text-sm text-muted-foreground">{selectedMovie?.year}</p>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold">{selectedMovie?.title}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedMovie?.year} • {selectedMovie?.genres.join(", ")}</p>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="ml-auto"
                   onClick={() => setStep("search")}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </Button>
               </div>
+            </div>
 
-              {/* Rating */}
-              <div>
-                <label className="text-sm font-semibold mb-2 block">Your Rating</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => setRating(star)}
-                      className="transition-transform hover:scale-110"
-                    >
-                      <Star
-                        className={`w-8 h-8 ${
-                          star <= rating ? "text-primary fill-primary" : "text-muted"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Watched Date */}
-              <div>
-                <label className="text-sm font-semibold mb-2 block">Date Watched</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !watchedDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {watchedDate ? format(watchedDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={watchedDate}
-                      onSelect={(date) => date && setWatchedDate(date)}
-                      disabled={(date) => date > new Date()}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Review */}
-              <div>
-                <label className="text-sm font-semibold mb-2 block">Your Review</label>
-                <Textarea
-                  placeholder="Share your thoughts about this movie..."
-                  value={review}
-                  onChange={(e) => setReview(e.target.value)}
-                  className="min-h-[100px]"
-                />
-              </div>
-
-              {/* Privacy Setting */}
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">
-                  {isPublic ? "Public" : "Friends Only"}
-                </label>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">
-                    {isPublic ? "Everyone" : "Friends"}
-                  </span>
-                  <Switch
-                    checked={isPublic}
-                    onCheckedChange={(checked) => {
-                      haptic.light();
-                      setIsPublic(checked);
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Tagged Friends */}
-              <div>
-                <label className="text-sm font-semibold mb-2 block">Watched With</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {taggedFriends.map((friend) => (
-                    <div
-                      key={friend.id}
-                      className="flex items-center gap-2 bg-accent px-3 py-1 rounded-full"
-                    >
-                      <Avatar className="w-5 h-5">
-                        <AvatarImage src={friend.avatar} />
-                        <AvatarFallback>{friend.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm">{friend.name}</span>
-                      <button onClick={() => handleRemoveTag(friend.id)}>
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={() => setShowFriendSearch(!showFriendSearch)}
-                  >
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Tag friend
-                  </Button>
-                </div>
-
-                {showFriendSearch && (
-                  <div className="border border-border rounded-lg p-2 space-y-1">
-                    {mockFriends.map((friend) => (
+            <ScrollArea className="flex-1">
+              <div className="p-6 space-y-4">
+                {/* Rating Section */}
+                <div className="bg-card rounded-lg p-6 border">
+                  <h4 className="text-center font-semibold mb-4">How was it?</h4>
+                  <div className="flex justify-center gap-3">
+                    {[1, 2, 3, 4, 5].map((star) => (
                       <button
-                        key={friend.id}
-                        onClick={() => handleTagFriend(friend)}
-                        className="w-full flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors"
+                        key={star}
+                        onClick={() => {
+                          haptic.light();
+                          setRating(star);
+                        }}
+                        className="transition-transform hover:scale-110"
                       >
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={friend.avatar} />
-                          <AvatarFallback>{friend.name[0]}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm">{friend.name}</span>
+                        <Star
+                          className={`w-10 h-10 ${
+                            star <= rating ? "text-primary fill-primary" : "text-muted"
+                          }`}
+                        />
                       </button>
                     ))}
                   </div>
-                )}
-              </div>
-
-              {/* Photos */}
-              <div>
-                <label className="text-sm font-semibold mb-2 block">Photos</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {photos.map((photo, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={photo}
-                        alt={`Upload ${index + 1}`}
-                        className="w-20 h-20 object-cover rounded-lg"
-                      />
-                      <button
-                        onClick={() => handleRemovePhoto(index)}
-                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                  <label className="w-20 h-20 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent transition-colors">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="hidden"
-                      onChange={handlePhotoUpload}
-                    />
-                    <ImageIcon className="w-6 h-6 text-muted-foreground" />
-                  </label>
                 </div>
-              </div>
+
+                {/* Who did you watch with */}
+                <div className="bg-card rounded-lg border">
+                  <button
+                    onClick={() => setShowFriendSearch(!showFriendSearch)}
+                    className="w-full flex items-center gap-3 p-4 hover:bg-accent/50 transition-colors"
+                  >
+                    <UserPlus className="w-5 h-5" />
+                    <span className="flex-1 text-left font-medium">Who did you watch with?</span>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                  </button>
+                  
+                  {taggedFriends.length > 0 && (
+                    <div className="px-4 pb-3 flex flex-wrap gap-2">
+                      {taggedFriends.map((friend) => (
+                        <div
+                          key={friend.id}
+                          className="flex items-center gap-2 bg-accent px-3 py-1.5 rounded-full"
+                        >
+                          <Avatar className="w-5 h-5">
+                            <AvatarImage src={friend.avatar} />
+                            <AvatarFallback>{friend.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm">{friend.name}</span>
+                          <button onClick={() => handleRemoveTag(friend.id)}>
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {showFriendSearch && (
+                    <div className="px-4 pb-4 space-y-1 border-t pt-3">
+                      {mockFriends.map((friend) => (
+                        <button
+                          key={friend.id}
+                          onClick={() => handleTagFriend(friend)}
+                          className="w-full flex items-center gap-3 p-2 rounded hover:bg-accent transition-colors"
+                        >
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={friend.avatar} />
+                            <AvatarFallback>{friend.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm">{friend.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Add Review */}
+                <div className="bg-card rounded-lg border">
+                  <button
+                    onClick={() => setShowReview(!showReview)}
+                    className="w-full flex items-center gap-3 p-4 hover:bg-accent/50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span className="flex-1 text-left font-medium">Add review</span>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                  </button>
+                  
+                  {showReview && (
+                    <div className="px-4 pb-4 border-t pt-3">
+                      <Textarea
+                        placeholder="Share your thoughts..."
+                        value={review}
+                        onChange={(e) => setReview(e.target.value)}
+                        className="min-h-[100px] resize-none"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Add Photos */}
+                <div className="bg-card rounded-lg border">
+                  <button
+                    onClick={() => setShowPhotos(!showPhotos)}
+                    className="w-full flex items-center gap-3 p-4 hover:bg-accent/50 transition-colors"
+                  >
+                    <ImageIcon className="w-5 h-5" />
+                    <span className="flex-1 text-left font-medium">Add photos</span>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                  </button>
+                  
+                  {showPhotos && (
+                    <div className="px-4 pb-4 border-t pt-3">
+                      <div className="flex flex-wrap gap-2">
+                        {photos.map((photo, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={photo}
+                              alt={`Upload ${index + 1}`}
+                              className="w-20 h-20 object-cover rounded-lg"
+                            />
+                            <button
+                              onClick={() => handleRemovePhoto(index)}
+                              className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                        <label className="w-20 h-20 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent transition-colors">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={handlePhotoUpload}
+                          />
+                          <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Date Watched */}
+                <div className="bg-card rounded-lg border">
+                  <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                    <PopoverTrigger asChild>
+                      <button className="w-full flex items-center gap-3 p-4 hover:bg-accent/50 transition-colors">
+                        <CalendarIcon className="w-5 h-5" />
+                        <span className="flex-1 text-left font-medium">
+                          {format(watchedDate, "MMMM d, yyyy")}
+                        </span>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={watchedDate}
+                        onSelect={(date) => {
+                          if (date) {
+                            setWatchedDate(date);
+                            setShowDatePicker(false);
+                          }
+                        }}
+                        disabled={(date) => date > new Date()}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Privacy Toggle */}
+                <div className="bg-card rounded-lg border">
+                  <div className="flex items-center justify-between p-4">
+                    <div className="flex items-center gap-3">
+                      <Lock className="w-5 h-5" />
+                      <div>
+                        <div className="font-medium">Friends Only</div>
+                        <div className="text-xs text-muted-foreground">Hide this activity from public</div>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={!isPublic}
+                      onCheckedChange={(checked) => {
+                        haptic.light();
+                        setIsPublic(!checked);
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             </ScrollArea>
 
-            {/* Post Button - Fixed at Bottom */}
-            <div className="border-t border-border pt-3 mt-3">
+            {/* Post Button */}
+            <div className="p-6 border-t">
               <Button
                 onClick={handlePost}
                 className="w-full"

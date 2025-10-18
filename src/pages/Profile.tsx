@@ -245,22 +245,24 @@ const Profile = () => {
                 </div>
               </Link>
 
-              <Link to="/collection/watchlist">
-                <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-all cursor-pointer neon-card">
-                  <div className="flex items-center gap-3">
-                    <Bookmark className="w-6 h-6 text-secondary neon-glow-secondary" />
-                    <span className="font-semibold text-foreground">Want to Watch</span>
+              <div>
+                <Link to="/collection/watchlist">
+                  <div className="flex items-center justify-between p-4 bg-card border border-border rounded-t-lg hover:border-primary/30 transition-all cursor-pointer neon-card border-b-0">
+                    <div className="flex items-center gap-3">
+                      <Bookmark className="w-6 h-6 text-secondary neon-glow-secondary" />
+                      <span className="font-semibold text-foreground">Want to Watch</span>
+                    </div>
+                    <span className="text-2xl font-bold text-foreground">{profileData.watchlist}</span>
                   </div>
-                  <span className="text-2xl font-bold text-foreground">{profileData.watchlist}</span>
-                </div>
-              </Link>
+                </Link>
 
-              <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg neon-card">
-                <div className="flex items-center gap-3">
-                  <Flame className="w-6 h-6 text-accent neon-glow-accent" />
-                  <span className="font-semibold text-foreground">Streak</span>
+                <div className="flex items-center justify-between p-4 bg-card border border-border rounded-b-lg neon-card">
+                  <div className="flex items-center gap-3">
+                    <Flame className="w-6 h-6 text-accent neon-glow-accent" />
+                    <span className="font-semibold text-foreground">Streak</span>
+                  </div>
+                  <span className="text-2xl font-bold text-foreground">4 weeks</span>
                 </div>
-                <span className="text-2xl font-bold text-foreground">4 weeks</span>
               </div>
             </div>
 

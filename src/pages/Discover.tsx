@@ -1,10 +1,12 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, X, Info, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Heart, X, Info, ArrowLeft, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptic";
+import MovieSearch from "@/components/MovieSearch";
 
 interface Movie {
   id: number;
@@ -85,6 +87,7 @@ const Discover = () => {
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const currentMovie = movies[currentIndex];
@@ -155,7 +158,7 @@ const Discover = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <Link to="/">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="w-5 h-5" />
@@ -168,8 +171,24 @@ const Discover = () => {
               <Info className="w-5 h-5" />
             </Button>
           </div>
+
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search for movies & TV shows..."
+              className="pl-10 bg-muted/50 cursor-pointer"
+              onClick={() => {
+                haptic.light();
+                setIsSearchOpen(true);
+              }}
+              readOnly
+            />
+          </div>
         </div>
       </header>
+
+      <MovieSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} />
 
       {/* Card Stack */}
       <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">

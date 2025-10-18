@@ -5,9 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Star, Clock, Calendar, Users as UsersIcon, Heart, MessageCircle } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ArrowLeft, Star, Clock, Calendar, Users as UsersIcon, Heart, MessageCircle, Play, ChevronDown } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import { haptic } from "@/lib/haptic";
+import AddPostDialog from "@/components/AddPostDialog";
 
 interface Review {
   id: number;
@@ -25,6 +27,8 @@ interface Review {
 const MovieDetails = () => {
   const { movieId } = useParams();
   const navigate = useNavigate();
+  const [isAddPostOpen, setIsAddPostOpen] = useState(false);
+  const [showAllCast, setShowAllCast] = useState(false);
 
   // Mock movie data - in production this would come from an API
   const movie = {
@@ -32,13 +36,27 @@ const MovieDetails = () => {
     title: "Past Lives",
     year: "2023",
     director: "Celine Song",
-    runtime: "105 min",
+    runtime: "121 mins",
     genres: ["Drama", "Romance"],
     poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&h=600&fit=crop",
     backdrop: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1200&h=600&fit=crop",
-    averageRating: 4.7,
-    totalReviews: 234,
-    description: "Nora and Hae Sung, two deeply connected childhood friends, are wrest apart after Nora's family emigrates from South Korea. Two decades later, they are reunited in New York for one fateful week as they confront notions of destiny, love, and the choices that make a life.",
+    averageRating: 3.8,
+    totalReviews: 83,
+    tagline: "GO FOR THE ULTIMATE SPIN.",
+    description: "After being bitten by a genetically altered spider at Oscorp, nerdy but endearing high school student Peter Parker is endowed with amazing powers to become the Amazing superhero known as Spider-Man.",
+    cast: [
+      { name: "Tobey Maguire", role: "Peter Parker / Spider-Man" },
+      { name: "Willem Dafoe", role: "Norman Osborn / Green Goblin" },
+      { name: "Kirsten Dunst", role: "Mary Jane Watson" },
+      { name: "James Franco", role: "Harry Osborn" },
+    ],
+    ratingDistribution: [
+      { stars: 5, count: 45 },
+      { stars: 4, count: 38 },
+      { stars: 3, count: 12 },
+      { stars: 2, count: 3 },
+      { stars: 1, count: 2 },
+    ]
   };
 
   const [reviews] = useState<Review[]>([
@@ -91,16 +109,18 @@ const MovieDetails = () => {
     haptic.light();
   };
 
+  const maxRatingCount = Math.max(...movie.ratingDistribution.map(r => r.count));
+
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Hero Section */}
-      <div className="relative h-64 overflow-hidden">
+      {/* Hero Section with Backdrop */}
+      <div className="relative h-[60vh] overflow-hidden">
         <img
           src={movie.backdrop}
           alt={movie.title}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/60 to-background" />
         
         <Button
           variant="ghost"
@@ -110,172 +130,201 @@ const MovieDetails = () => {
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
-      </div>
 
-      {/* Movie Info */}
-      <div className="container mx-auto px-4 -mt-20 relative z-10">
-        <div className="flex gap-6 mb-6">
-          <img
-            src={movie.poster}
-            alt={movie.title}
-            className="w-32 h-48 object-cover rounded-lg shadow-2xl poster-glow"
-          />
-          
-          <div className="flex-1 pt-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">{movie.title}</h1>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center gap-1 bg-primary/20 px-3 py-1 rounded-full">
-                <Star className="w-4 h-4 text-primary fill-primary" />
-                <span className="font-bold text-primary">{movie.averageRating}</span>
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {movie.totalReviews} reviews
-              </span>
-            </div>
+        {/* Movie Title and Info Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-6">
+          <div className="container mx-auto flex items-end gap-6">
+            <img
+              src={movie.poster}
+              alt={movie.title}
+              className="w-32 h-48 object-cover rounded-lg shadow-2xl poster-glow"
+            />
             
-            <div className="flex flex-wrap gap-2 mb-4">
-              {movie.genres.map((genre) => (
-                <Badge key={genre} variant="secondary" className="neon-badge">
-                  {genre}
-                </Badge>
-              ))}
+            <div className="flex-1 pb-2">
+              <h1 className="text-4xl font-bold text-foreground mb-2">{movie.title}</h1>
+              <p className="text-muted-foreground mb-3">
+                {movie.year} • DIRECTED BY <span className="font-semibold">{movie.director}</span>
+              </p>
+              
+              <div className="flex items-center gap-3">
+                <Button className="gap-2" onClick={() => haptic.light()}>
+                  <Play className="w-4 h-4" />
+                  TRAILER
+                </Button>
+                <span className="text-muted-foreground">{movie.runtime}</span>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Movie Metadata */}
-        <Card className="mb-6 neon-card">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <Calendar className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                <div className="text-sm font-semibold text-foreground">{movie.year}</div>
-                <div className="text-xs text-muted-foreground">Year</div>
+      <div className="container mx-auto px-4 py-6 space-y-6">
+
+        {/* Tagline */}
+        {movie.tagline && (
+          <p className="text-lg font-semibold text-muted-foreground mb-4">
+            {movie.tagline}
+          </p>
+        )}
+
+        {/* Description */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <p className="text-foreground/90 leading-relaxed">{movie.description}</p>
+          </CardContent>
+        </Card>
+
+        {/* Ratings Section */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4">RATINGS</h3>
+            
+            <div className="flex items-end gap-2 mb-6">
+              {movie.ratingDistribution.map((rating) => {
+                const barHeight = (rating.count / maxRatingCount) * 100;
+                return (
+                  <div key={rating.stars} className="flex-1 flex flex-col items-center gap-1">
+                    <div
+                      className="w-full bg-primary/30 rounded-t"
+                      style={{ height: `${Math.max(barHeight, 10)}px` }}
+                    />
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(rating.stars)].map((_, i) => (
+                        <Star key={i} className="w-2.5 h-2.5 text-primary fill-primary" />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Star className="w-6 h-6 text-primary fill-primary" />
+                <span className="text-3xl font-bold">{movie.averageRating}</span>
               </div>
-              <div>
-                <Clock className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                <div className="text-sm font-semibold text-foreground">{movie.runtime}</div>
-                <div className="text-xs text-muted-foreground">Runtime</div>
-              </div>
-              <div>
-                <UsersIcon className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                <div className="text-sm font-semibold text-foreground">{movie.director}</div>
-                <div className="text-xs text-muted-foreground">Director</div>
+              <div className="flex items-center gap-2">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 text-primary fill-primary" />
+                ))}
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Tabs */}
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full mb-6 bg-card/50 neon-border-subtle">
-            <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
-            <TabsTrigger value="reviews" className="flex-1">
-              Reviews ({movie.totalReviews})
-            </TabsTrigger>
-          </TabsList>
+        {/* Action Button */}
+        <Button
+          className="w-full mb-6 h-14"
+          variant="secondary"
+          onClick={() => {
+            haptic.light();
+            setIsAddPostOpen(true);
+          }}
+        >
+          <UsersIcon className="w-5 h-5 mr-2" />
+          Rate, log, review, add to list + more
+        </Button>
 
-          <TabsContent value="overview" className="space-y-4 animate-fade-in">
-            <Card className="neon-card">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-3">Synopsis</h3>
-                <p className="text-foreground/90 leading-relaxed">{movie.description}</p>
-              </CardContent>
-            </Card>
+        {/* Cast Section */}
+        {showAllCast && (
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Cast</h3>
+              <div className="space-y-3">
+                {movie.cast.map((actor) => (
+                  <div key={actor.name} className="flex justify-between items-center">
+                    <span className="font-medium">{actor.name}</span>
+                    <span className="text-sm text-muted-foreground">{actor.role}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-            <Button className="w-full neon-glow-primary" size="lg">
-              Add to Watchlist
-            </Button>
-          </TabsContent>
+        {/* Popular Reviews Section */}
+        <div className="mb-6">
+          <div
+            className="flex items-center justify-between mb-4 cursor-pointer"
+            onClick={() => setShowAllCast(!showAllCast)}
+          >
+            <h3 className="text-lg font-semibold">
+              Show {movie.cast.length} more
+            </h3>
+            <ChevronDown className={`w-5 h-5 transition-transform ${showAllCast ? 'rotate-180' : ''}`} />
+          </div>
+        </div>
 
-          <TabsContent value="reviews" className="space-y-4 animate-fade-in">
-            {sortedReviews.map((review) => (
-              <Card key={review.id} className="neon-card">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <Avatar className="w-12 h-12 border-2 border-primary/20 neon-border-subtle">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-4">POPULAR REVIEWS</h3>
+          
+          <div className="space-y-4">
+            {sortedReviews.slice(0, 3).map((review) => (
+              <Card key={review.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3 mb-3">
+                    <Avatar className="w-10 h-10 border-2 border-primary/20">
                       <AvatarImage src={review.userAvatar} alt={review.userName} />
                       <AvatarFallback>{review.userName[0]}</AvatarFallback>
                     </Avatar>
                     
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-foreground">{review.userName}</p>
-                            {review.isFriend && (
-                              <Badge variant="secondary" className="text-xs neon-badge">
-                                Friend
-                              </Badge>
-                            )}
-                            {!review.isPublic && review.isFriend && (
-                              <Badge variant="outline" className="text-xs">
-                                Private
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground">{review.date}</p>
-                        </div>
-                        
-                        <div className="flex items-center gap-1">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="font-semibold text-sm">{review.userName}</p>
+                        <div className="flex items-center gap-0.5">
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`w-4 h-4 ${
-                                i < review.rating
-                                  ? "text-primary fill-primary"
-                                  : "text-muted"
+                              className={`w-3 h-3 ${
+                                i < review.rating ? "text-primary fill-primary" : "text-muted"
                               }`}
                             />
                           ))}
                         </div>
                       </div>
                       
-                      {review.isFriend && (
-                        <p className="text-sm text-primary/80 italic mb-2">
-                          Your friend reviewed this
-                        </p>
-                      )}
-                      
-                      <p className="text-foreground/90 leading-relaxed mb-4">
+                      <p className="text-foreground/90 text-sm leading-relaxed">
                         {review.review}
                       </p>
-                      
-                      <div className="flex items-center gap-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleLike}
-                          className="hover:text-accent hover:neon-glow-accent"
-                        >
-                          <Heart className="w-4 h-4 mr-1" />
-                          {review.likes}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => haptic.light()}
-                          className="hover:text-secondary hover:neon-glow-secondary"
-                        >
-                          <MessageCircle className="w-4 h-4 mr-1" />
-                          {review.comments}
-                        </Button>
-                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
-            
-            {sortedReviews.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+          </div>
+
+          <Link to={`/movie/${movieId}/reviews`}>
+            <Button
+              variant="ghost"
+              className="w-full mt-4 text-muted-foreground hover:text-foreground"
+              onClick={() => haptic.light()}
+            >
+              All reviews
+              <ChevronDown className="w-4 h-4 ml-2 -rotate-90" />
+            </Button>
+          </Link>
+        </div>
+
+        {/* Related Films */}
+        <div>
+          <h3 className="text-lg font-semibold mb-4">RELATED FILMS</h3>
+          <ScrollArea className="w-full whitespace-nowrap">
+            <div className="flex gap-3 pb-4">
+              {[1, 2, 3, 4].map((i) => (
+                <img
+                  key={i}
+                  src={`https://images.unsplash.com/photo-${1485846234645 + i * 1000}-a62644f84728?w=200&h=300&fit=crop`}
+                  alt={`Related movie ${i}`}
+                  className="w-32 h-48 object-cover rounded border-2 border-primary/20 cursor-pointer hover:border-primary/50 transition-all"
+                  onClick={() => haptic.light()}
+                />
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
       </div>
 
+      <AddPostDialog open={isAddPostOpen} onOpenChange={setIsAddPostOpen} />
       <BottomNav />
     </div>
   );

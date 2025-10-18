@@ -2,17 +2,20 @@ import MovieCard from "@/components/MovieCard";
 import ReviewCard from "@/components/ReviewCard";
 import BottomNav from "@/components/BottomNav";
 import AddPostDialog from "@/components/AddPostDialog";
+import MovieSearch from "@/components/MovieSearch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sparkles, TrendingUp, Users, Search, Film, Calendar, Bell } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { haptic } from "@/lib/haptic";
 
 type FeedFilter = "forYou" | "trending" | "friends";
 
 const Index = () => {
   const [isAddPostOpen, setIsAddPostOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<FeedFilter>("forYou");
 
   const trendingMovies = [
@@ -160,7 +163,12 @@ const Index = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
               placeholder="Search movies, friends, etc."
-              className="pl-10 bg-muted/50"
+              className="pl-10 bg-muted/50 cursor-pointer"
+              onClick={() => {
+                haptic.light();
+                setIsSearchOpen(true);
+              }}
+              readOnly
             />
           </div>
         </div>
@@ -312,6 +320,7 @@ const Index = () => {
       {/* Floating Add Post Button - moved to bottom nav post button */}
       
       <AddPostDialog open={isAddPostOpen} onOpenChange={setIsAddPostOpen} />
+      <MovieSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} />
 
       <BottomNav onPostClick={() => setIsAddPostOpen(true)} />
 

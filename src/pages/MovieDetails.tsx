@@ -216,19 +216,6 @@ const MovieDetails = () => {
           </CardContent>
         </Card>
 
-        {/* Action Button */}
-        <Button
-          className="w-full mb-6 h-14"
-          variant="secondary"
-          onClick={() => {
-            haptic.light();
-            setIsAddPostOpen(true);
-          }}
-        >
-          <UsersIcon className="w-5 h-5 mr-2" />
-          Rate, log, review, add to list + more
-        </Button>
-
         {/* Cast Section */}
         {showAllCast && (
           <Card className="mb-6">

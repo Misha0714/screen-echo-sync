@@ -1,3 +1,4 @@
+import { useState } from "react";
 import BottomNav from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -6,8 +7,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Share2, CheckCircle2, Bookmark, Heart, Trophy, Flame, Settings } from "lucide-react";
 import ReviewCard from "@/components/ReviewCard";
 import { Link } from "react-router-dom";
+import FollowersModal from "@/components/FollowersModal";
+import { haptic } from "@/lib/haptic";
 
 const Profile = () => {
+  const [followersModalOpen, setFollowersModalOpen] = useState(false);
+  const [followingModalOpen, setFollowingModalOpen] = useState(false);
+
+  // Mock data for followers/following
+  const followers = [
+    { id: "1", name: "Sarah Johnson", username: "sarahjmovies", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah", isFollowing: true },
+    { id: "2", name: "Mike Chen", username: "mikecinema", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike", isFollowing: false },
+    { id: "3", name: "Emma Davis", username: "emmawatches", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma", isFollowing: true },
+  ];
+
+  const following = [
+    { id: "4", name: "Jordan Lee", username: "jordanfilms", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan", isFollowing: true },
+    { id: "5", name: "Taylor Kim", username: "taylorreviews", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Taylor", isFollowing: true },
+  ];
+
   const watchedMovies = [
     { title: "Past Lives", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop" },
     { title: "The Lighthouse", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop" },
@@ -71,14 +89,26 @@ const Profile = () => {
 
           {/* Stats */}
           <div className="flex justify-center gap-12 mb-8">
-            <div className="text-center">
+            <button
+              onClick={() => {
+                haptic.light();
+                setFollowersModalOpen(true);
+              }}
+              className="text-center cursor-pointer hover:opacity-70 transition-opacity"
+            >
               <div className="text-2xl font-bold text-foreground">24</div>
               <div className="text-sm text-muted-foreground">Followers</div>
-            </div>
-            <div className="text-center">
+            </button>
+            <button
+              onClick={() => {
+                haptic.light();
+                setFollowingModalOpen(true);
+              }}
+              className="text-center cursor-pointer hover:opacity-70 transition-opacity"
+            >
               <div className="text-2xl font-bold text-foreground">23</div>
               <div className="text-sm text-muted-foreground">Following</div>
-            </div>
+            </button>
             <div className="text-center">
               <div className="text-2xl font-bold text-foreground">🔒</div>
               <div className="text-sm text-muted-foreground">Rank on Rewind</div>
@@ -288,6 +318,20 @@ const Profile = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <FollowersModal
+        open={followersModalOpen}
+        onOpenChange={setFollowersModalOpen}
+        type="followers"
+        users={followers}
+      />
+
+      <FollowersModal
+        open={followingModalOpen}
+        onOpenChange={setFollowingModalOpen}
+        type="following"
+        users={following}
+      />
 
       <BottomNav />
     </div>

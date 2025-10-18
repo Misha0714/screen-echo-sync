@@ -32,7 +32,7 @@ const AllReviews = () => {
   const [activeFilter, setActiveFilter] = useState<ReviewFilter>("everyone");
 
   // Mock data - in production this would come from an API
-  const movieTitle = "Spider-Man";
+  const movieTitle = movieId === "past-lives" ? "Past Lives" : "Spider-Man";
   
   const allReviews: Review[] = [
     {

@@ -108,7 +108,7 @@ const mockFriends = [
 
 const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
   const { toast } = useToast();
-  const [step, setStep] = useState<"search" | "compose">("search");
+  const [step, setStep] = useState<"search" | "compose" | "compare">("search");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<any>(null);
   const [rating, setRating] = useState(0);
@@ -121,6 +121,24 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
   const [showReview, setShowReview] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // Comparison movies - mock data
+  const [comparisonMovies] = useState([
+    { 
+      id: 1, 
+      title: "Past Lives", 
+      year: "2023",
+      rating: 4.7,
+      poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop"
+    },
+    { 
+      id: 3, 
+      title: "Everything Everywhere All at Once", 
+      year: "2022",
+      rating: 4.9,
+      poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop"
+    },
+  ]);
 
   const filteredMovies = mockMovies.filter(movie =>
     movie.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -156,6 +174,11 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
   };
 
   const handlePost = () => {
+    // Show comparison screen first
+    setStep("compare");
+  };
+
+  const handleFinishComparison = () => {
     haptic.success();
     
     onOpenChange(false);
@@ -229,6 +252,86 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
               </ScrollArea>
             </div>
           </>
+        ) : step === "compare" ? (
+          <div className="flex flex-col h-full p-6 gap-6">
+            <h2 className="text-2xl font-bold text-center">Which do you prefer?</h2>
+            
+            <div className="flex items-center gap-4">
+              {/* Movie 1 */}
+              <button
+                onClick={() => {
+                  haptic.light();
+                  handleFinishComparison();
+                }}
+                className="flex-1 p-6 border-2 border-border rounded-2xl hover:border-primary transition-all min-h-[200px] flex flex-col items-center justify-center gap-3"
+              >
+                <img
+                  src={comparisonMovies[0].poster}
+                  alt={comparisonMovies[0].title}
+                  className="w-20 h-30 object-cover rounded-lg"
+                />
+                <div className="text-center">
+                  <h3 className="font-bold text-lg mb-1">{comparisonMovies[0].title}</h3>
+                  <p className="text-sm text-muted-foreground">{comparisonMovies[0].year}</p>
+                </div>
+              </button>
+
+              {/* OR Badge */}
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                OR
+              </div>
+
+              {/* Movie 2 */}
+              <button
+                onClick={() => {
+                  haptic.light();
+                  handleFinishComparison();
+                }}
+                className="flex-1 p-6 border-2 border-border rounded-2xl hover:border-primary transition-all min-h-[200px] flex flex-col items-center justify-center gap-3"
+              >
+                <img
+                  src={comparisonMovies[1].poster}
+                  alt={comparisonMovies[1].title}
+                  className="w-20 h-30 object-cover rounded-lg"
+                />
+                <div className="text-center">
+                  <h3 className="font-bold text-lg mb-1">{comparisonMovies[1].title}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {comparisonMovies[1].year} • {comparisonMovies[1].rating}
+                  </p>
+                </div>
+              </button>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-between gap-4 mt-auto">
+              <Button
+                variant="ghost"
+                onClick={() => setStep("compose")}
+                className="gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Undo
+              </Button>
+
+              <Button variant="outline" onClick={handleFinishComparison}>
+                Too tough
+              </Button>
+
+              <Button
+                variant="ghost"
+                onClick={handleFinishComparison}
+                className="gap-2"
+              >
+                Skip
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </Button>
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col h-full">
             {/* Movie Header */}

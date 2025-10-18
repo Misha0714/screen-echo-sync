@@ -210,18 +210,9 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Floating Add Post Button */}
-      <Button
-        onClick={() => setIsAddPostOpen(true)}
-        className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-40"
-        size="icon"
-      >
-        <Plus className="w-6 h-6" />
-      </Button>
-
       <AddPostDialog open={isAddPostOpen} onOpenChange={setIsAddPostOpen} />
 
-      <BottomNav />
+      <BottomNav onPostClick={() => setIsAddPostOpen(true)} />
 
     </div>
   );

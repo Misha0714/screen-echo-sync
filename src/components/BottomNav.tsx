@@ -2,7 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Film, TrendingUp, Plus, Users, Sparkles } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
-const BottomNav = () => {
+interface BottomNavProps {
+  onPostClick?: () => void;
+}
+
+const BottomNav = ({ onPostClick }: BottomNavProps) => {
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -29,7 +33,11 @@ const BottomNav = () => {
             <span className="text-xs">Discover</span>
           </Button>
           
-          <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
+          <Button 
+            variant="ghost" 
+            className="flex flex-col items-center gap-1 h-auto py-2"
+            onClick={onPostClick}
+          >
             <div className="bg-primary rounded-full p-2">
               <Plus className="w-5 h-5 text-primary-foreground" />
             </div>

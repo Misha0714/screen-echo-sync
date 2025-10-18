@@ -309,15 +309,11 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                               }
                             }}
                             className={cn(
-                              "flex flex-col items-center gap-1 p-2 rounded-lg border transition-colors shrink-0",
-                              isTagged ? "bg-primary/10 border-primary" : "bg-card border-border hover:bg-accent"
+                              "px-4 py-2 rounded-full border text-sm font-medium transition-colors shrink-0",
+                              isTagged ? "bg-primary/10 border-primary text-primary" : "bg-card border-border hover:bg-accent"
                             )}
                           >
-                            <Avatar className="w-12 h-12">
-                              <AvatarImage src={friend.avatar} />
-                              <AvatarFallback className="text-xs">{friend.name[0]}</AvatarFallback>
-                            </Avatar>
-                            <span className="text-xs font-medium text-center">{friend.name.split(' ')[0]}</span>
+                            {friend.name.split(' ')[0]}
                           </button>
                         );
                       })}
@@ -326,47 +322,37 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                 </div>
 
                 {/* Add Photos */}
-                <div className="bg-card rounded-lg border">
-                  <button
-                    onClick={() => setShowPhotos(!showPhotos)}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-accent/50 transition-colors"
-                  >
-                    <ImageIcon className="w-4 h-4" />
-                    <span className="flex-1 text-left text-sm font-medium">Add photos</span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                  
-                  {showPhotos && (
-                    <div className="px-3 pb-3 border-t pt-2">
-                      <div className="flex flex-wrap gap-2">
-                        {photos.map((photo, index) => (
-                          <div key={index} className="relative">
-                            <img
-                              src={photo}
-                              alt={`Upload ${index + 1}`}
-                              className="w-16 h-16 object-cover rounded-lg"
-                            />
-                            <button
-                              onClick={() => handleRemovePhoto(index)}
-                              className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </div>
-                        ))}
-                        <label className="w-16 h-16 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent transition-colors">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="hidden"
-                            onChange={handlePhotoUpload}
-                          />
-                          <ImageIcon className="w-5 h-5 text-muted-foreground" />
-                        </label>
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Photos</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {photos.map((photo, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={photo}
+                          alt={`Upload ${index + 1}`}
+                          className="w-20 h-20 object-cover rounded-lg"
+                        />
+                        <button
+                          onClick={() => handleRemovePhoto(index)}
+                          className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
                       </div>
-                    </div>
-                  )}
+                    ))}
+                    <label className="w-20 h-20 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent transition-colors">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        onChange={handlePhotoUpload}
+                      />
+                      <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </label>
+                  </div>
                 </div>
 
                 {/* Date Watched */}

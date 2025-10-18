@@ -184,13 +184,13 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0 gap-0">
+      <DialogContent className="sm:max-w-[450px] max-h-[85vh] p-0 gap-0">
         {step === "search" ? (
           <>
-            <DialogHeader className="px-6 pt-6 pb-4">
+            <DialogHeader className="px-4 pt-4 pb-3">
               <DialogTitle>What did you watch?</DialogTitle>
             </DialogHeader>
-            <div className="flex flex-col gap-4 px-6 pb-6">
+            <div className="flex flex-col gap-3 px-4 pb-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -207,21 +207,21 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                     <button
                       key={movie.id}
                       onClick={() => handleSelectMovie(movie)}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
                     >
                       <img
                         src={movie.poster}
                         alt={movie.title}
-                        className="w-12 h-18 object-cover rounded"
+                        className="w-10 h-15 object-cover rounded"
                       />
                       <div className="text-left flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-semibold">{movie.title}</p>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <p className="font-semibold text-sm">{movie.title}</p>
                           <Badge variant="outline" className="text-xs">
                             {movie.type === "tv" ? "TV" : "Movie"}
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">{movie.year} • {movie.director}</p>
+                        <p className="text-xs text-muted-foreground">{movie.year}</p>
                       </div>
                     </button>
                   ))}
@@ -232,33 +232,34 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
         ) : (
           <div className="flex flex-col h-full">
             {/* Movie Header */}
-            <div className="p-6 border-b">
+            <div className="p-4 border-b">
               <div className="flex items-center gap-3">
                 <img
                   src={selectedMovie?.poster}
                   alt={selectedMovie?.title}
-                  className="w-16 h-24 object-cover rounded"
+                  className="w-12 h-18 object-cover rounded"
                 />
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold">{selectedMovie?.title}</h3>
-                  <p className="text-sm text-muted-foreground">{selectedMovie?.year} • {selectedMovie?.genres.join(", ")}</p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold truncate">{selectedMovie?.title}</h3>
+                  <p className="text-xs text-muted-foreground truncate">{selectedMovie?.year}</p>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="shrink-0"
                   onClick={() => setStep("search")}
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
             <ScrollArea className="flex-1">
-              <div className="p-6 space-y-4">
+              <div className="p-4 space-y-2">
                 {/* Rating Section */}
-                <div className="bg-card rounded-lg p-6 border">
-                  <h4 className="text-center font-semibold mb-4">How was it?</h4>
-                  <div className="flex justify-center gap-3">
+                <div className="bg-card rounded-lg p-4 border">
+                  <h4 className="text-center text-sm font-semibold mb-3">How was it?</h4>
+                  <div className="flex justify-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
@@ -269,7 +270,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                         className="transition-transform hover:scale-110"
                       >
                         <Star
-                          className={`w-10 h-10 ${
+                          className={`w-8 h-8 ${
                             star <= rating ? "text-primary fill-primary" : "text-muted"
                           }`}
                         />
@@ -282,25 +283,25 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                 <div className="bg-card rounded-lg border">
                   <button
                     onClick={() => setShowFriendSearch(!showFriendSearch)}
-                    className="w-full flex items-center gap-3 p-4 hover:bg-accent/50 transition-colors"
+                    className="w-full flex items-center gap-3 p-3 hover:bg-accent/50 transition-colors"
                   >
-                    <UserPlus className="w-5 h-5" />
-                    <span className="flex-1 text-left font-medium">Who did you watch with?</span>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    <UserPlus className="w-4 h-4" />
+                    <span className="flex-1 text-left text-sm font-medium">Who did you watch with?</span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   </button>
                   
                   {taggedFriends.length > 0 && (
-                    <div className="px-4 pb-3 flex flex-wrap gap-2">
+                    <div className="px-3 pb-2 flex flex-wrap gap-1.5">
                       {taggedFriends.map((friend) => (
                         <div
                           key={friend.id}
-                          className="flex items-center gap-2 bg-accent px-3 py-1.5 rounded-full"
+                          className="flex items-center gap-1.5 bg-accent px-2 py-1 rounded-full"
                         >
-                          <Avatar className="w-5 h-5">
+                          <Avatar className="w-4 h-4">
                             <AvatarImage src={friend.avatar} />
-                            <AvatarFallback>{friend.name[0]}</AvatarFallback>
+                            <AvatarFallback className="text-xs">{friend.name[0]}</AvatarFallback>
                           </Avatar>
-                          <span className="text-sm">{friend.name}</span>
+                          <span className="text-xs">{friend.name}</span>
                           <button onClick={() => handleRemoveTag(friend.id)}>
                             <X className="w-3 h-3" />
                           </button>
@@ -310,18 +311,18 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                   )}
 
                   {showFriendSearch && (
-                    <div className="px-4 pb-4 space-y-1 border-t pt-3">
+                    <div className="px-3 pb-3 space-y-1 border-t pt-2">
                       {mockFriends.map((friend) => (
                         <button
                           key={friend.id}
                           onClick={() => handleTagFriend(friend)}
-                          className="w-full flex items-center gap-3 p-2 rounded hover:bg-accent transition-colors"
+                          className="w-full flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors"
                         >
-                          <Avatar className="w-8 h-8">
+                          <Avatar className="w-6 h-6">
                             <AvatarImage src={friend.avatar} />
-                            <AvatarFallback>{friend.name[0]}</AvatarFallback>
+                            <AvatarFallback className="text-xs">{friend.name[0]}</AvatarFallback>
                           </Avatar>
-                          <span className="text-sm">{friend.name}</span>
+                          <span className="text-xs">{friend.name}</span>
                         </button>
                       ))}
                     </div>
@@ -332,22 +333,22 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                 <div className="bg-card rounded-lg border">
                   <button
                     onClick={() => setShowReview(!showReview)}
-                    className="w-full flex items-center gap-3 p-4 hover:bg-accent/50 transition-colors"
+                    className="w-full flex items-center gap-3 p-3 hover:bg-accent/50 transition-colors"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    <span className="flex-1 text-left font-medium">Add review</span>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    <span className="flex-1 text-left text-sm font-medium">Add review</span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   </button>
                   
                   {showReview && (
-                    <div className="px-4 pb-4 border-t pt-3">
+                    <div className="px-3 pb-3 border-t pt-2">
                       <Textarea
                         placeholder="Share your thoughts..."
                         value={review}
                         onChange={(e) => setReview(e.target.value)}
-                        className="min-h-[100px] resize-none"
+                        className="min-h-[80px] resize-none text-sm"
                       />
                     </div>
                   )}
@@ -357,32 +358,32 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                 <div className="bg-card rounded-lg border">
                   <button
                     onClick={() => setShowPhotos(!showPhotos)}
-                    className="w-full flex items-center gap-3 p-4 hover:bg-accent/50 transition-colors"
+                    className="w-full flex items-center gap-3 p-3 hover:bg-accent/50 transition-colors"
                   >
-                    <ImageIcon className="w-5 h-5" />
-                    <span className="flex-1 text-left font-medium">Add photos</span>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    <ImageIcon className="w-4 h-4" />
+                    <span className="flex-1 text-left text-sm font-medium">Add photos</span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   </button>
                   
                   {showPhotos && (
-                    <div className="px-4 pb-4 border-t pt-3">
+                    <div className="px-3 pb-3 border-t pt-2">
                       <div className="flex flex-wrap gap-2">
                         {photos.map((photo, index) => (
                           <div key={index} className="relative">
                             <img
                               src={photo}
                               alt={`Upload ${index + 1}`}
-                              className="w-20 h-20 object-cover rounded-lg"
+                              className="w-16 h-16 object-cover rounded-lg"
                             />
                             <button
                               onClick={() => handleRemovePhoto(index)}
-                              className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                              className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
                             >
                               <X className="w-3 h-3" />
                             </button>
                           </div>
                         ))}
-                        <label className="w-20 h-20 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent transition-colors">
+                        <label className="w-16 h-16 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent transition-colors">
                           <input
                             type="file"
                             accept="image/*"
@@ -390,7 +391,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                             className="hidden"
                             onChange={handlePhotoUpload}
                           />
-                          <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                          <ImageIcon className="w-5 h-5 text-muted-foreground" />
                         </label>
                       </div>
                     </div>
@@ -401,12 +402,12 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                 <div className="bg-card rounded-lg border">
                   <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                     <PopoverTrigger asChild>
-                      <button className="w-full flex items-center gap-3 p-4 hover:bg-accent/50 transition-colors">
-                        <CalendarIcon className="w-5 h-5" />
-                        <span className="flex-1 text-left font-medium">
-                          {format(watchedDate, "MMMM d, yyyy")}
+                      <button className="w-full flex items-center gap-3 p-3 hover:bg-accent/50 transition-colors">
+                        <CalendarIcon className="w-4 h-4" />
+                        <span className="flex-1 text-left text-sm font-medium">
+                          {format(watchedDate, "MMM d, yyyy")}
                         </span>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
                       </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -429,12 +430,12 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
 
                 {/* Privacy Toggle */}
                 <div className="bg-card rounded-lg border">
-                  <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center justify-between p-3">
                     <div className="flex items-center gap-3">
-                      <Lock className="w-5 h-5" />
+                      <Lock className="w-4 h-4" />
                       <div>
-                        <div className="font-medium">Friends Only</div>
-                        <div className="text-xs text-muted-foreground">Hide this activity from public</div>
+                        <div className="text-sm font-medium">Friends Only</div>
+                        <div className="text-xs text-muted-foreground">Hide from public</div>
                       </div>
                     </div>
                     <Switch
@@ -450,13 +451,13 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
             </ScrollArea>
 
             {/* Post Button */}
-            <div className="p-6 border-t">
+            <div className="p-4 border-t bg-background">
               <Button
                 onClick={handlePost}
                 className="w-full"
                 disabled={!rating}
               >
-                Post to Feed
+                Post
               </Button>
             </div>
           </div>

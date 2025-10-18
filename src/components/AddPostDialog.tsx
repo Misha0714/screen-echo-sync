@@ -243,14 +243,6 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                   <h3 className="text-base font-bold truncate">{selectedMovie?.title}</h3>
                   <p className="text-xs text-muted-foreground truncate">{selectedMovie?.year}</p>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="shrink-0"
-                  onClick={() => setStep("search")}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
               </div>
             </div>
 

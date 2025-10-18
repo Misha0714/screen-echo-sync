@@ -309,8 +309,31 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                           </button>
                         );
                       })}
+                      <button
+                        onClick={() => {
+                          haptic.light();
+                          setShowFriendSearch(!showFriendSearch);
+                        }}
+                        className="px-4 py-2 rounded-full border border-dashed border-border text-sm font-medium text-muted-foreground hover:bg-accent transition-colors shrink-0"
+                      >
+                        View more
+                      </button>
                     </div>
                   </ScrollArea>
+                  
+                  {showFriendSearch && (
+                    <div className="mt-3 p-3 bg-card rounded-lg border space-y-1">
+                      {mockFriends.map((friend) => (
+                        <button
+                          key={friend.id}
+                          onClick={() => handleTagFriend(friend)}
+                          className="w-full flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors text-left"
+                        >
+                          <span className="text-sm">{friend.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Add Photos */}

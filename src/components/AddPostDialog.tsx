@@ -281,7 +281,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
 
               {/* Review */}
               <div>
-                <label className="text-sm font-semibold mb-2 block">Your Review (Optional)</label>
+                <label className="text-sm font-semibold mb-2 block">Your Review</label>
                 <Textarea
                   placeholder="Share your thoughts about this movie..."
                   value={review}

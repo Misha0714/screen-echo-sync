@@ -236,7 +236,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
           </div>
         ) : (
           <div className="flex flex-col h-full">
-            <ScrollArea className="flex-1 max-h-[520px]">
+            <ScrollArea className="flex-1 max-h-[540px]">
               <div className="space-y-4 pr-4 pb-2">
                 {/* Selected Movie */}
                 <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg">

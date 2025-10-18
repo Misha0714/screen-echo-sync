@@ -9,13 +9,17 @@ import { Share2, CheckCircle2, Bookmark, Heart, Trophy, Flame, Settings, ArrowLe
 import ReviewCard from "@/components/ReviewCard";
 import { Link } from "react-router-dom";
 import FollowersModal from "@/components/FollowersModal";
+import EditProfileDialog from "@/components/EditProfileDialog";
 import { haptic } from "@/lib/haptic";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const { username } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [followersModalOpen, setFollowersModalOpen] = useState(false);
   const [followingModalOpen, setFollowingModalOpen] = useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
 
   // Determine if viewing own profile or another user's
   const isOwnProfile = !username; // If no username param, it's the current user's profile
@@ -23,7 +27,7 @@ const Profile = () => {
   const [isPrivate, setIsPrivate] = useState(false); // Mock - would come from API
 
   // Mock user data - in production this would come from an API based on username
-  const profileData = username ? {
+  const [profileData, setProfileData] = useState(username ? {
     username: username,
     displayName: "Sarah Johnson",
     bio: "cinephile • love indie films and foreign cinema",
@@ -47,11 +51,34 @@ const Profile = () => {
     watchlist: 12,
     favorites: 8,
     isPrivate: false,
-  };
+  });
 
   const handleFollowToggle = () => {
     haptic.light();
     setIsFollowing(!isFollowing);
+  };
+
+  const handleEditProfile = (newUsername: string, newBio: string) => {
+    haptic.light();
+    setProfileData({
+      ...profileData,
+      username: newUsername,
+      bio: newBio,
+    });
+    toast({
+      title: "Profile updated",
+      description: "Your changes have been saved successfully.",
+    });
+  };
+
+  const handleShareProfile = () => {
+    haptic.medium();
+    const profileUrl = `${window.location.origin}/profile/${profileData.username}`;
+    navigator.clipboard.writeText(profileUrl);
+    toast({
+      title: "Profile link copied!",
+      description: "Share your profile with others.",
+    });
   };
 
   // Mock data for followers/following
@@ -131,8 +158,21 @@ const Profile = () => {
           <div className="flex gap-3 justify-center mb-6">
             {isOwnProfile ? (
               <>
-                <Button variant="outline" className="border-border">Edit profile</Button>
-                <Button variant="outline" className="border-border gap-2">
+                <Button 
+                  variant="outline" 
+                  className="border-border transition-all duration-200 hover:scale-105"
+                  onClick={() => {
+                    haptic.light();
+                    setEditProfileOpen(true);
+                  }}
+                >
+                  Edit profile
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-border gap-2 transition-all duration-200 hover:scale-105"
+                  onClick={handleShareProfile}
+                >
                   <Share2 className="w-4 h-4" />
                   Share profile
                 </Button>
@@ -410,6 +450,14 @@ const Profile = () => {
         onOpenChange={setFollowingModalOpen}
         type="following"
         users={following}
+      />
+
+      <EditProfileDialog
+        open={editProfileOpen}
+        onOpenChange={setEditProfileOpen}
+        currentUsername={profileData.username}
+        currentBio={profileData.bio}
+        onSave={handleEditProfile}
       />
 
       <BottomNav />

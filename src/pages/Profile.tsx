@@ -134,7 +134,7 @@ const Profile = () => {
         <Tabs defaultValue="activity" className="w-full">
           <TabsList className="w-full mb-6">
             <TabsTrigger value="activity" className="flex-1">Recent Activity</TabsTrigger>
-            <TabsTrigger value="taste" className="flex-1">Taste Profile</TabsTrigger>
+            <TabsTrigger value="taste" className="flex-1">Your Taste</TabsTrigger>
           </TabsList>
 
           <TabsContent value="activity" className="space-y-6">
@@ -143,10 +143,89 @@ const Profile = () => {
             ))}
           </TabsContent>
 
-          <TabsContent value="taste" className="space-y-4">
-            <p className="text-center text-muted-foreground py-12">
-              Your taste profile will appear here based on your viewing history and ratings.
-            </p>
+          <TabsContent value="taste" className="space-y-6">
+            {/* Top Genres */}
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Top Genres</h3>
+              <div className="space-y-3">
+                {[
+                  { genre: "Drama", count: 18, rating: "8.4" },
+                  { genre: "Science Fiction", count: 12, rating: "8.1" },
+                  { genre: "Romance", count: 8, rating: "7.8" },
+                  { genre: "Thriller", count: 7, rating: "8.6" },
+                ].map((item) => (
+                  <div key={item.genre} className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                    <div>
+                      <div className="font-semibold text-foreground">{item.genre}</div>
+                      <div className="text-sm text-muted-foreground">{item.count} movies</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-12 h-12 rounded-full border-2 border-primary/20 flex items-center justify-center">
+                        <span className="text-sm font-semibold text-primary">{item.rating}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Favorite Actors */}
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Most Watched Actors</h3>
+              <div className="space-y-3">
+                {[
+                  { name: "Timothée Chalamet", count: 6 },
+                  { name: "Florence Pugh", count: 5 },
+                  { name: "Oscar Isaac", count: 4 },
+                ].map((actor) => (
+                  <div key={actor.name} className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                    <div className="font-semibold text-foreground">{actor.name}</div>
+                    <div className="text-sm text-muted-foreground">{actor.count} movies</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Movie Duration Preference */}
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Duration Preference</h3>
+              <div className="space-y-3">
+                {[
+                  { duration: "90-120 min", count: 22, percentage: "49%" },
+                  { duration: "120-150 min", count: 15, percentage: "33%" },
+                  { duration: "150+ min", count: 8, percentage: "18%" },
+                ].map((item) => (
+                  <div key={item.duration} className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                    <div>
+                      <div className="font-semibold text-foreground">{item.duration}</div>
+                      <div className="text-sm text-muted-foreground">{item.count} movies</div>
+                    </div>
+                    <div className="text-lg font-bold text-primary">{item.percentage}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Top Countries */}
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Movies by Country</h3>
+              <div className="space-y-3">
+                {[
+                  { country: "United States", count: 28, flag: "🇺🇸" },
+                  { country: "France", count: 8, flag: "🇫🇷" },
+                  { country: "South Korea", count: 5, flag: "🇰🇷" },
+                  { country: "Japan", count: 4, flag: "🇯🇵" },
+                ].map((item) => (
+                  <div key={item.country} className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{item.flag}</span>
+                      <div className="font-semibold text-foreground">{item.country}</div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">{item.count} movies</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

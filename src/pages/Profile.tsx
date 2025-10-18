@@ -152,7 +152,8 @@ const Profile = () => {
           </Avatar>
           
           <h1 className="text-2xl font-bold text-foreground mb-1">@{profileData.username}</h1>
-          <p className="text-sm text-muted-foreground mb-2">Member since {profileData.memberSince}</p>
+          <p className="text-sm text-muted-foreground mb-1">Member since {profileData.memberSince}</p>
+          <p className="text-sm font-semibold text-primary mb-2">#1096 on Rewind</p>
           <p className="text-foreground/80 mb-6">{profileData.bio}</p>
           
           <div className="flex gap-3 justify-center mb-6">
@@ -216,10 +217,6 @@ const Profile = () => {
               <div className="text-2xl font-bold text-foreground">{profileData.following}</div>
               <div className="text-sm text-muted-foreground">Following</div>
             </button>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-foreground">🔒</div>
-              <div className="text-sm text-muted-foreground">Rank on Rewind</div>
-            </div>
           </div>
         </div>
 
@@ -252,28 +249,10 @@ const Profile = () => {
                   <span className="text-2xl font-bold text-foreground">{profileData.watchlist}</span>
                 </div>
               </Link>
-
-              <Link to="/collection/favorites">
-                <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-all cursor-pointer neon-card">
-                  <div className="flex items-center gap-3">
-                    <Heart className="w-6 h-6 text-accent neon-glow-accent" />
-                    <span className="font-semibold text-foreground">Favorites</span>
-                  </div>
-                  <span className="text-2xl font-bold text-foreground">{profileData.favorites}</span>
-                </div>
-              </Link>
             </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <Card className="p-6 bg-card border-border">
-            <div className="flex items-center gap-3 mb-2">
-              <Trophy className="w-6 h-6 text-primary" />
-              <span className="text-sm text-muted-foreground">Rank on Rewind</span>
-            </div>
-            <div className="text-sm text-muted-foreground">🔒</div>
-          </Card>
-
+        <div className="mb-8">
           <Card className="p-6 bg-card border-border">
             <div className="flex items-center gap-3 mb-2">
               <Flame className="w-6 h-6 text-accent" />

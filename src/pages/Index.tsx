@@ -3,7 +3,7 @@ import MovieCard from "@/components/MovieCard";
 import ReviewCard from "@/components/ReviewCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, TrendingUp, Users, Search, Film, Calendar, Bell } from "lucide-react";
+import { Sparkles, TrendingUp, Users, Search, Film, Calendar, Bell, Plus } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const Index = () => {
@@ -213,8 +213,10 @@ const Index = () => {
               <span className="text-xs">Discover</span>
             </Button>
             <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
-              <Search className="w-5 h-5" />
-              <span className="text-xs">Search</span>
+              <div className="bg-primary rounded-full p-2">
+                <Plus className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <span className="text-xs">Post</span>
             </Button>
             <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
               <Users className="w-5 h-5" />

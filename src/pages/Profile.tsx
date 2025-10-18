@@ -155,7 +155,6 @@ const Profile = () => {
           
           <h1 className="text-2xl font-bold text-foreground mb-1">@{profileData.username}</h1>
           <p className="text-sm text-muted-foreground mb-1">Member since {profileData.memberSince}</p>
-          <p className="text-sm font-semibold text-primary mb-2">#1096 on Rewind</p>
           <p className="text-foreground/80 mb-6">{profileData.bio}</p>
           
           <div className="flex gap-3 justify-center mb-6">
@@ -219,6 +218,10 @@ const Profile = () => {
               <div className="text-2xl font-bold text-foreground">{profileData.following}</div>
               <div className="text-sm text-muted-foreground">Following</div>
             </button>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-foreground">#1096</div>
+              <div className="text-sm text-muted-foreground">Ranking</div>
+            </div>
           </div>
         </div>
 
@@ -251,6 +254,14 @@ const Profile = () => {
                   <span className="text-2xl font-bold text-foreground">{profileData.watchlist}</span>
                 </div>
               </Link>
+
+              <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg neon-card">
+                <div className="flex items-center gap-3">
+                  <Flame className="w-6 h-6 text-accent neon-glow-accent" />
+                  <span className="font-semibold text-foreground">Streak</span>
+                </div>
+                <span className="text-2xl font-bold text-foreground">4 weeks</span>
+              </div>
             </div>
 
 

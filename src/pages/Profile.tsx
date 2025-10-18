@@ -42,7 +42,7 @@ const Profile = () => {
   } : {
     username: "alex_cinema",
     displayName: "Alex Chen",
-    bio: "all my movie picks finally have a purpose",
+    bio: "movie connoisseur",
     memberSince: "February 2025",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
     followers: 3,
@@ -89,8 +89,10 @@ const Profile = () => {
   ];
 
   const following = [
-    { id: "4", name: "Jordan Lee", username: "jordanfilms", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan", isFollowing: true },
-    { id: "5", name: "Taylor Kim", username: "taylorreviews", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Taylor", isFollowing: true },
+    { id: "1", name: "Sarah Johnson", username: "sarahjmovies", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah", isFollowing: true, isMutual: true },
+    { id: "3", name: "Emma Davis", username: "emmawatches", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma", isFollowing: true, isMutual: true },
+    { id: "4", name: "Jordan Lee", username: "jordanfilms", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan", isFollowing: true, isMutual: false },
+    { id: "5", name: "Taylor Kim", username: "taylorreviews", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Taylor", isFollowing: true, isMutual: false },
   ];
 
   const watchedMovies = [
@@ -205,7 +207,7 @@ const Profile = () => {
               className="text-center cursor-pointer hover:opacity-70 transition-opacity"
             >
               <div className="text-2xl font-bold text-foreground">{profileData.followers}</div>
-              <div className="text-sm text-muted-foreground">Followers <span className="text-primary">(friends)</span></div>
+              <div className="text-sm text-muted-foreground">Followers</div>
             </button>
             <button
               onClick={() => {
@@ -215,12 +217,8 @@ const Profile = () => {
               className="text-center cursor-pointer hover:opacity-70 transition-opacity"
             >
               <div className="text-2xl font-bold text-foreground">{profileData.following}</div>
-              <div className="text-sm text-muted-foreground">Following <span className="text-primary">(friends)</span></div>
+              <div className="text-sm text-muted-foreground">Following</div>
             </button>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-foreground">4 weeks</div>
-              <div className="text-sm text-muted-foreground">Streak</div>
-            </div>
           </div>
         </div>
 

@@ -12,6 +12,7 @@ interface User {
   username: string;
   avatar: string;
   isFollowing: boolean;
+  isMutual?: boolean;
 }
 
 interface FollowersModalProps {
@@ -66,8 +67,15 @@ const FollowersModal = ({ open, onOpenChange, type, users }: FollowersModalProps
                     </Avatar>
                     
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-foreground truncate">
-                        {user.name}
+                      <div className="flex items-center gap-2">
+                        <div className="font-semibold text-foreground truncate">
+                          {user.name}
+                        </div>
+                        {user.isMutual && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
+                            friends
+                          </span>
+                        )}
                       </div>
                       <div className="text-sm text-muted-foreground truncate">
                         @{user.username}

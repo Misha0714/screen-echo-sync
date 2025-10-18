@@ -279,7 +279,7 @@ const Profile = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-background/50 p-4 rounded-lg border border-primary/20">
-              <div className="text-3xl font-bold text-primary mb-1">127 hours</div>
+              <div className="text-3xl font-bold text-primary mb-1">30 hours</div>
               <div className="text-sm text-muted-foreground">Total watch time</div>
             </div>
             <div className="bg-background/50 p-4 rounded-lg border border-secondary/20">

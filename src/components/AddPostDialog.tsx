@@ -236,8 +236,8 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
           </div>
         ) : (
           <div className="flex flex-col h-full">
-            <ScrollArea className="flex-1 max-h-[480px]">
-              <div className="space-y-4 pr-4">
+            <ScrollArea className="flex-1 max-h-[520px]">
+              <div className="space-y-4 pr-4 pb-2">
                 {/* Selected Movie */}
                 <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg">
                 <img
@@ -291,28 +291,14 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
               </div>
 
               {/* Privacy Setting */}
-              <div>
-                <label className="text-sm font-semibold mb-2 block">Privacy</label>
-                <div className="flex items-center justify-between p-3 bg-card/50 rounded-lg border border-border">
-                  <div className="flex items-center gap-2">
-                    {isPublic ? (
-                      <>
-                        <Globe className="w-4 h-4 text-primary" />
-                        <div>
-                          <p className="text-sm font-medium text-foreground">Public</p>
-                          <p className="text-xs text-muted-foreground">Anyone can see this</p>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-4 h-4 text-secondary" />
-                        <div>
-                          <p className="text-sm font-medium text-foreground">Friends Only</p>
-                          <p className="text-xs text-muted-foreground">Only friends can see</p>
-                        </div>
-                      </>
-                    )}
-                  </div>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">
+                  {isPublic ? "Public" : "Friends Only"}
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    {isPublic ? "Everyone" : "Friends"}
+                  </span>
                   <Switch
                     checked={isPublic}
                     onCheckedChange={(checked) => {

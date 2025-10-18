@@ -236,7 +236,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
           </div>
         ) : (
           <div className="flex flex-col h-full">
-            <ScrollArea className="flex-1 max-h-[500px]">
+            <ScrollArea className="flex-1 max-h-[550px]">
               <div className="space-y-6 pr-4">
                 {/* Selected Movie */}
                 <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg">
@@ -288,6 +288,39 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                   onChange={(e) => setReview(e.target.value)}
                   className="min-h-[100px]"
                 />
+              </div>
+
+              {/* Privacy Setting */}
+              <div>
+                <label className="text-sm font-semibold mb-3 block">Privacy</label>
+                <div className="flex items-center justify-between p-4 bg-card/50 rounded-lg border border-border neon-border-subtle">
+                  <div className="flex items-center gap-3">
+                    {isPublic ? (
+                      <>
+                        <Globe className="w-5 h-5 text-primary" />
+                        <div>
+                          <p className="font-medium text-foreground">Public</p>
+                          <p className="text-xs text-muted-foreground">Anyone can see this review</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-5 h-5 text-secondary" />
+                        <div>
+                          <p className="font-medium text-foreground">Friends Only</p>
+                          <p className="text-xs text-muted-foreground">Only your friends can see this</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <Switch
+                    checked={isPublic}
+                    onCheckedChange={(checked) => {
+                      haptic.light();
+                      setIsPublic(checked);
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Tagged Friends */}
@@ -370,39 +403,6 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                   </label>
                 </div>
               </div>
-
-              {/* Privacy Setting */}
-              <div>
-                <label className="text-sm font-semibold mb-3 block">Privacy</label>
-                <div className="flex items-center justify-between p-4 bg-card/50 rounded-lg border border-border neon-border-subtle">
-                  <div className="flex items-center gap-3">
-                    {isPublic ? (
-                      <>
-                        <Globe className="w-5 h-5 text-primary" />
-                        <div>
-                          <p className="font-medium text-foreground">Public</p>
-                          <p className="text-xs text-muted-foreground">Anyone can see this review</p>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-5 h-5 text-secondary" />
-                        <div>
-                          <p className="font-medium text-foreground">Friends Only</p>
-                          <p className="text-xs text-muted-foreground">Only your friends can see this</p>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <Switch
-                    checked={isPublic}
-                    onCheckedChange={(checked) => {
-                      haptic.light();
-                      setIsPublic(checked);
-                    }}
-                  />
-                  </div>
-                </div>
               </div>
             </ScrollArea>
 

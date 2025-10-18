@@ -255,11 +255,11 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
             </div>
 
             <ScrollArea className="flex-1">
-              <div className="p-4 space-y-2">
-                {/* Rating Section */}
-                <div className="bg-card rounded-lg p-4 border">
-                  <h4 className="text-center text-sm font-semibold mb-3">How was it?</h4>
-                  <div className="flex justify-center gap-2">
+              <div className="p-4 space-y-3">
+                {/* Rating */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">How was it?</h4>
+                  <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
@@ -270,13 +270,24 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                         className="transition-transform hover:scale-110"
                       >
                         <Star
-                          className={`w-8 h-8 ${
+                          className={`w-9 h-9 ${
                             star <= rating ? "text-primary fill-primary" : "text-muted"
                           }`}
                         />
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Review */}
+                <div>
+                  <label className="text-sm font-semibold mb-2 block">Review</label>
+                  <Textarea
+                    placeholder="Share your thoughts..."
+                    value={review}
+                    onChange={(e) => setReview(e.target.value)}
+                    className="min-h-[80px] resize-none text-sm"
+                  />
                 </div>
 
                 {/* Who did you watch with */}
@@ -325,31 +336,6 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                           <span className="text-xs">{friend.name}</span>
                         </button>
                       ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Add Review */}
-                <div className="bg-card rounded-lg border">
-                  <button
-                    onClick={() => setShowReview(!showReview)}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-accent/50 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    <span className="flex-1 text-left text-sm font-medium">Add review</span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                  
-                  {showReview && (
-                    <div className="px-3 pb-3 border-t pt-2">
-                      <Textarea
-                        placeholder="Share your thoughts..."
-                        value={review}
-                        onChange={(e) => setReview(e.target.value)}
-                        className="min-h-[80px] resize-none text-sm"
-                      />
                     </div>
                   )}
                 </div>
@@ -427,31 +413,25 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                     </PopoverContent>
                   </Popover>
                 </div>
-
-                {/* Privacy Toggle */}
-                <div className="bg-card rounded-lg border">
-                  <div className="flex items-center justify-between p-3">
-                    <div className="flex items-center gap-3">
-                      <Lock className="w-4 h-4" />
-                      <div>
-                        <div className="text-sm font-medium">Friends Only</div>
-                        <div className="text-xs text-muted-foreground">Hide from public</div>
-                      </div>
-                    </div>
-                    <Switch
-                      checked={!isPublic}
-                      onCheckedChange={(checked) => {
-                        haptic.light();
-                        setIsPublic(!checked);
-                      }}
-                    />
-                  </div>
-                </div>
               </div>
             </ScrollArea>
 
-            {/* Post Button */}
+            {/* Post Button with Privacy Toggle */}
             <div className="p-4 border-t bg-background">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-2 flex-1">
+                  <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Friends only</span>
+                  <Switch
+                    checked={!isPublic}
+                    onCheckedChange={(checked) => {
+                      haptic.light();
+                      setIsPublic(!checked);
+                    }}
+                    className="scale-75"
+                  />
+                </div>
+              </div>
               <Button
                 onClick={handlePost}
                 className="w-full"

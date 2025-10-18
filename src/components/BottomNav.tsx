@@ -28,10 +28,19 @@ const BottomNav = ({ onPostClick }: BottomNavProps) => {
             </Button>
           </Link>
           
-          <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
-            <TrendingUp className="w-5 h-5" />
-            <span className="text-xs">Discover</span>
-          </Button>
+          <Link to="/discover">
+            <Button 
+              variant="ghost" 
+              className={`flex flex-col items-center gap-1 h-auto py-2 ${
+                currentPath === "/discover" ? "text-primary" : ""
+              }`}
+            >
+              <TrendingUp className={`w-5 h-5 ${currentPath === "/discover" ? "text-primary" : ""}`} />
+              <span className={`text-xs ${currentPath === "/discover" ? "text-primary font-medium" : ""}`}>
+                Discover
+              </span>
+            </Button>
+          </Link>
           
           <Button 
             variant="ghost" 

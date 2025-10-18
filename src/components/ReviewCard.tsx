@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import VibeTag from "./VibeTag";
-import CommentSection from "./CommentSection";
 import { haptic } from "@/lib/haptic";
 
 interface ReviewCardProps {
@@ -43,8 +42,6 @@ const ReviewCard = ({
   const [showReactions, setShowReactions] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
   const [likeCount, setLikeCount] = useState(likes);
-  const [showComments, setShowComments] = useState(false);
-  const [commentCount, setCommentCount] = useState(comments);
 
   // Generate username from name if not provided
   const username = userUsername || userName.toLowerCase().replace(/\s+/g, '');
@@ -66,29 +63,6 @@ const ReviewCard = ({
       setLikeCount(likeCount + 1);
     }
   };
-
-  const handleCommentClick = () => {
-    haptic.light();
-    setShowComments(!showComments);
-  };
-
-  // Mock initial comments
-  const initialComments = [
-    {
-      id: "1",
-      userName: "Sarah Johnson",
-      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-      text: "I completely agree! This movie was incredible.",
-      timestamp: "2 hours ago",
-    },
-    {
-      id: "2",
-      userName: "Mike Chen",
-      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
-      text: "Can't wait to watch this one!",
-      timestamp: "5 hours ago",
-    },
-  ];
 
   return (
     <Card className="bg-card border-border p-6 hover:border-primary/30 transition-all duration-300 neon-card">
@@ -209,32 +183,14 @@ const ReviewCard = ({
             </div>
           )}
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className={`text-muted-foreground hover:text-primary gap-2 ${showComments ? "text-primary" : ""}`}
-          onClick={handleCommentClick}
-        >
+        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary gap-2">
           <MessageCircle className="w-4 h-4" />
-          {commentCount}
+          {comments}
         </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-muted-foreground hover:text-primary gap-2 ml-auto"
-          onClick={() => haptic.light()}
-        >
+        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary gap-2 ml-auto">
           <Share2 className="w-4 h-4" />
         </Button>
       </div>
-
-      {/* Comments Section */}
-      {showComments && (
-        <CommentSection 
-          movieTitle={movieTitle} 
-          initialComments={initialComments}
-        />
-      )}
     </Card>
   );
 };

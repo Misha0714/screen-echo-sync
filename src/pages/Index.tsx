@@ -122,7 +122,7 @@ const Index = () => {
   ];
 
 
-  const vibes = ["Cozy", "Intense", "Nostalgic", "Uplifting", "Chaotic", "Existential"];
+  
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -158,24 +158,6 @@ const Index = () => {
       </header>
 
 
-      {/* Vibes Filter */}
-      <div className="container mx-auto px-4 pb-4">
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-2">
-            {vibes.map((vibe) => (
-              <Button 
-                key={vibe} 
-                variant="secondary" 
-                size="sm" 
-                className="rounded-full flex-shrink-0"
-              >
-                {vibe}
-              </Button>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
 
       {/* Trending Section */}
       <section className="container mx-auto px-4 py-6">

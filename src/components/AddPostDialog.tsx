@@ -26,9 +26,21 @@ const mockMovies = [
     director: "Celine Song",
     reviewCount: 234,
     avgRating: 4.7,
+    type: "movie" as const,
   },
   { 
     id: 2, 
+    title: "The Last of Us", 
+    year: "2023", 
+    poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop",
+    genres: ["Drama", "Sci-Fi"],
+    director: "Craig Mazin, Neil Druckmann",
+    reviewCount: 1823,
+    avgRating: 4.9,
+    type: "tv" as const,
+  },
+  { 
+    id: 3, 
     title: "Everything Everywhere All at Once", 
     year: "2022", 
     poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop",
@@ -36,9 +48,21 @@ const mockMovies = [
     director: "Daniel Kwan, Daniel Scheinert",
     reviewCount: 1823,
     avgRating: 4.9,
+    type: "movie" as const,
   },
   { 
-    id: 3, 
+    id: 4, 
+    title: "The Bear", 
+    year: "2022-", 
+    poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop",
+    genres: ["Drama", "Comedy"],
+    director: "Christopher Storer",
+    reviewCount: 892,
+    avgRating: 4.8,
+    type: "tv" as const,
+  },
+  { 
+    id: 5, 
     title: "The Lighthouse", 
     year: "2019", 
     poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop",
@@ -46,9 +70,21 @@ const mockMovies = [
     director: "Robert Eggers",
     reviewCount: 1243,
     avgRating: 4.3,
+    type: "movie" as const,
   },
   { 
-    id: 4, 
+    id: 6, 
+    title: "Succession", 
+    year: "2018-2023", 
+    poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=200&h=300&fit=crop",
+    genres: ["Drama"],
+    director: "Jesse Armstrong",
+    reviewCount: 2156,
+    avgRating: 4.9,
+    type: "tv" as const,
+  },
+  { 
+    id: 7, 
     title: "Amélie", 
     year: "2001", 
     poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop",
@@ -56,6 +92,7 @@ const mockMovies = [
     director: "Jean-Pierre Jeunet",
     reviewCount: 2341,
     avgRating: 4.8,
+    type: "movie" as const,
   },
 ];
 
@@ -143,7 +180,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search for a movie..."
+                placeholder="Search for a movie or TV show..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -164,7 +201,12 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                       className="w-12 h-18 object-cover rounded poster-glow"
                     />
                     <div className="text-left flex-1">
-                      <p className="font-semibold">{movie.title}</p>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-semibold">{movie.title}</p>
+                        <Badge variant="outline" className="text-xs">
+                          {movie.type === "tv" ? "TV" : "Movie"}
+                        </Badge>
+                      </div>
                       <p className="text-sm text-muted-foreground mb-1">{movie.year} • {movie.director}</p>
                       <div className="flex flex-wrap gap-1 mb-2">
                         {movie.genres.slice(0, 2).map((genre) => (

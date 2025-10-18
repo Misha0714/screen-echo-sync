@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Share2, CheckCircle2, Bookmark, Heart, Trophy, Flame, Settings } from "lucide-react";
 import ReviewCard from "@/components/ReviewCard";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const watchedMovies = [
@@ -87,28 +88,35 @@ const Profile = () => {
 
         {/* Collection Sections */}
         <div className="space-y-4 mb-8">
-          <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-colors cursor-pointer">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-6 h-6 text-primary" />
-              <span className="font-semibold text-foreground">Watched</span>
+          <Link to="/collection/watched">
+            <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-all cursor-pointer neon-card">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-6 h-6 text-primary neon-glow-primary" />
+                <span className="font-semibold text-foreground">Watched</span>
+              </div>
+              <span className="text-2xl font-bold text-foreground">58</span>
             </div>
-            <span className="text-2xl font-bold text-foreground">45</span>
-          </div>
+          </Link>
 
-          <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-colors cursor-pointer">
-            <div className="flex items-center gap-3">
-              <Bookmark className="w-6 h-6 text-secondary" />
-              <span className="font-semibold text-foreground">Want to Watch</span>
+          <Link to="/collection/watchlist">
+            <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-all cursor-pointer neon-card">
+              <div className="flex items-center gap-3">
+                <Bookmark className="w-6 h-6 text-secondary neon-glow-secondary" />
+                <span className="font-semibold text-foreground">Want to Watch</span>
+              </div>
+              <span className="text-2xl font-bold text-foreground">12</span>
             </div>
-            <span className="text-2xl font-bold text-foreground">8</span>
-          </div>
+          </Link>
 
-          <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-colors cursor-pointer">
-            <div className="flex items-center gap-3">
-              <Heart className="w-6 h-6 text-accent" />
-              <span className="font-semibold text-foreground">Recs for You</span>
+          <Link to="/collection/favorites">
+            <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-all cursor-pointer neon-card">
+              <div className="flex items-center gap-3">
+                <Heart className="w-6 h-6 text-accent neon-glow-accent" />
+                <span className="font-semibold text-foreground">Favorites</span>
+              </div>
+              <span className="text-2xl font-bold text-foreground">8</span>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Stats Cards */}
@@ -130,15 +138,15 @@ const Profile = () => {
           </Card>
         </div>
 
-        {/* Year Wrapped Section */}
+        {/* Watch Year Wrapped Section */}
         <Card className="p-6 mb-8 bg-gradient-primary/10 border-primary/30 neon-card">
           <div className="flex items-center gap-3 mb-6">
             <Trophy className="w-8 h-8 text-primary neon-glow-primary" />
             <div>
               <h2 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                2025 Movie Year Wrapped
+                2025 Watch Year Wrapped
               </h2>
-              <p className="text-sm text-muted-foreground">Your cinematic journey this year</p>
+              <p className="text-sm text-muted-foreground">Your viewing journey this year</p>
             </div>
           </div>
 
@@ -148,8 +156,8 @@ const Profile = () => {
               <div className="text-sm text-muted-foreground">Total watch time</div>
             </div>
             <div className="bg-background/50 p-4 rounded-lg border border-secondary/20">
-              <div className="text-3xl font-bold text-secondary mb-1">45</div>
-              <div className="text-sm text-muted-foreground">Movies watched</div>
+              <div className="text-3xl font-bold text-secondary mb-1">58</div>
+              <div className="text-sm text-muted-foreground">Titles watched</div>
             </div>
             <div className="bg-background/50 p-4 rounded-lg border border-accent/20">
               <div className="text-3xl font-bold text-accent mb-1">8.2</div>
@@ -158,23 +166,23 @@ const Profile = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold text-foreground mb-4">Top 3 Rated Films of 2025</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Top 3 Rated Titles of 2025</h3>
             <div className="space-y-3">
               {[
-                { title: "Past Lives", rating: 10, genre: "Romance, Drama", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop" },
-                { title: "Everything Everywhere All at Once", rating: 9.5, genre: "Action, Sci-Fi", poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop" },
-                { title: "The Lighthouse", rating: 9.2, genre: "Horror, Drama", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop" },
-              ].map((movie, index) => (
-                <div key={movie.title} className="flex items-center gap-4 p-3 bg-background/50 rounded-lg border border-primary/10 neon-border-subtle">
+                { title: "The Last of Us", rating: 10, genre: "Drama, Sci-Fi", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop", type: "TV" },
+                { title: "Past Lives", rating: 9.5, genre: "Romance, Drama", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop", type: "Movie" },
+                { title: "The Bear", rating: 9.2, genre: "Drama, Comedy", poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop", type: "TV" },
+              ].map((item, index) => (
+                <div key={item.title} className="flex items-center gap-4 p-3 bg-background/50 rounded-lg border border-primary/10 neon-border-subtle">
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary font-bold">
                     {index + 1}
                   </div>
-                  <img src={movie.poster} alt={movie.title} className="w-12 h-16 object-cover rounded neon-border-subtle" />
+                  <img src={item.poster} alt={item.title} className="w-12 h-16 object-cover rounded neon-border-subtle" />
                   <div className="flex-1">
-                    <div className="font-semibold text-foreground">{movie.title}</div>
-                    <div className="text-xs text-muted-foreground">{movie.genre}</div>
+                    <div className="font-semibold text-foreground">{item.title}</div>
+                    <div className="text-xs text-muted-foreground">{item.type} • {item.genre}</div>
                   </div>
-                  <div className="text-xl font-bold text-primary">{movie.rating}</div>
+                  <div className="text-xl font-bold text-primary">{item.rating}</div>
                 </div>
               ))}
             </div>

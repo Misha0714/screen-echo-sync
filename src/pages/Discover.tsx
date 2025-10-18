@@ -14,10 +14,11 @@ interface Movie {
   genres: string[];
   matchPercentage: number;
   description: string;
+  type: "movie" | "tv";
 }
 
 const Discover = () => {
-  const [movies, setMovies] = useState<Movie[]>([
+  const movies = [
     {
       id: 1,
       title: "The Lighthouse",
@@ -25,45 +26,60 @@ const Discover = () => {
       poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=600&fit=crop",
       genres: ["Psychological", "Horror", "Drama"],
       matchPercentage: 94,
-      description: "Two lighthouse keepers descend into madness on a remote island."
+      description: "Two lighthouse keepers descend into madness on a remote island.",
+      type: "movie",
     },
     {
       id: 2,
+      title: "The Last of Us",
+      year: "2023",
+      poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=600&fit=crop",
+      genres: ["Drama", "Sci-Fi", "Adventure"],
+      matchPercentage: 96,
+      description: "A grizzled survivor and a young girl traverse a post-apocalyptic America.",
+      type: "tv",
+    },
+    {
+      id: 3,
       title: "Amélie",
       year: "2001",
       poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=400&h=600&fit=crop",
       genres: ["Romance", "Comedy", "Drama"],
       matchPercentage: 89,
-      description: "A shy waitress decides to change the lives of those around her."
+      description: "A shy waitress decides to change the lives of those around her.",
+      type: "movie",
     },
     {
-      id: 3,
+      id: 4,
+      title: "Succession",
+      year: "2018-2023",
+      poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&h=600&fit=crop",
+      genres: ["Drama"],
+      matchPercentage: 93,
+      description: "The Roy family fights for control of their media conglomerate.",
+      type: "tv",
+    },
+    {
+      id: 5,
       title: "Blade Runner 2049",
       year: "2017",
       poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&h=600&fit=crop",
       genres: ["Sci-Fi", "Thriller", "Mystery"],
       matchPercentage: 92,
-      description: "A blade runner uncovers a secret that could plunge society into chaos."
+      description: "A blade runner uncovers a secret that could plunge society into chaos.",
+      type: "movie",
     },
     {
-      id: 4,
-      title: "Spirited Away",
-      year: "2001",
-      poster: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=600&fit=crop",
-      genres: ["Animation", "Fantasy", "Adventure"],
-      matchPercentage: 96,
-      description: "A young girl enters a magical world to save her parents."
-    },
-    {
-      id: 5,
-      title: "Parasite",
-      year: "2019",
-      poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop",
-      genres: ["Thriller", "Drama", "Dark Comedy"],
+      id: 6,
+      title: "The Bear",
+      year: "2022-",
+      poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=400&h=600&fit=crop",
+      genres: ["Drama", "Comedy"],
       matchPercentage: 91,
-      description: "A poor family schemes to become employed by a wealthy household."
+      description: "A young chef returns to Chicago to run his family's sandwich shop.",
+      type: "tv",
     },
-  ]);
+  ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
@@ -126,9 +142,9 @@ const Discover = () => {
             That's all for now!
           </h2>
           <p className="text-muted-foreground">Check back later for more recommendations</p>
-          <Link to="/">
-            <Button className="mt-4">Back to Feed</Button>
-          </Link>
+            <Link to="/">
+              <Button className="mt-4">Back to Feed</Button>
+            </Link>
         </div>
       </div>
     );
@@ -146,7 +162,7 @@ const Discover = () => {
               </Button>
             </Link>
             <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              Discover
+              Discover Movies & TV
             </h1>
             <Button variant="ghost" size="icon">
               <Info className="w-5 h-5" />
@@ -239,6 +255,11 @@ const Discover = () => {
 
               {/* Movie Info */}
               <div className="absolute bottom-0 left-0 right-0 p-6 space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="secondary" className="neon-badge">
+                    {currentMovie.type === "tv" ? "TV Show" : "Movie"}
+                  </Badge>
+                </div>
                 <div>
                   <h2 className="text-3xl font-bold text-foreground mb-1">
                     {currentMovie.title}

@@ -68,10 +68,10 @@ const Community = () => {
     },
     {
       id: 4,
-      name: "Horror Movie Club",
+      name: "Horror Club",
       category: "Genre",
       members: 56700,
-      description: "Scary movies, thrilling discussions",
+      description: "Scary movies & series, thrilling discussions",
       icon: "https://api.dicebear.com/7.x/shapes/svg?seed=horror",
       isJoined: false,
       color: "hsl(340 80% 55%)",
@@ -85,6 +85,16 @@ const Community = () => {
       icon: "https://api.dicebear.com/7.x/shapes/svg?seed=ghibli",
       isJoined: true,
       color: "hsl(190 80% 55%)",
+    },
+    {
+      id: 6,
+      name: "Peak TV Drama",
+      category: "Genre",
+      members: 67200,
+      description: "For lovers of prestige television dramas",
+      icon: "https://api.dicebear.com/7.x/shapes/svg?seed=drama",
+      isJoined: true,
+      color: "hsl(220 75% 55%)",
     },
   ]);
 

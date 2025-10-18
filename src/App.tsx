@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import Discover from "./pages/Discover";
 import Community from "./pages/Community";
 import MovieDetails from "./pages/MovieDetails";
+import Collection from "./pages/Collection";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,8 @@ const App = () => (
           <Route path="/discover" element={<Discover />} />
           <Route path="/community" element={<Community />} />
           <Route path="/movie/:movieId" element={<MovieDetails />} />
+          <Route path="/tv/:showId" element={<MovieDetails />} />
+          <Route path="/collection/:collectionType" element={<Collection />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

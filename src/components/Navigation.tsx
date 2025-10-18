@@ -1,5 +1,6 @@
 import { Film, Search, User, Users, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Navigation = () => {
   return (
@@ -35,9 +36,11 @@ const Navigation = () => {
             <PlusCircle className="w-4 h-4 mr-2" />
             Post
           </Button>
-          <Button variant="ghost" size="icon" className="text-foreground/80 hover:text-foreground">
-            <User className="w-5 h-5" />
-          </Button>
+          <Link to="/profile">
+            <Button variant="ghost" size="icon" className="text-foreground/80 hover:text-foreground">
+              <User className="w-5 h-5" />
+            </Button>
+          </Link>
         </div>
       </div>
     </nav>

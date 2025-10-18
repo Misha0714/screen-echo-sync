@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sparkles, TrendingUp, Users, Search, Film, Calendar, Bell, Plus } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const trendingMovies = [
@@ -222,10 +223,12 @@ const Index = () => {
               <Users className="w-5 h-5" />
               <span className="text-xs">Friends</span>
             </Button>
-            <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
-              <Sparkles className="w-5 h-5" />
-              <span className="text-xs">Profile</span>
-            </Button>
+            <Link to="/profile">
+              <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
+                <Sparkles className="w-5 h-5" />
+                <span className="text-xs">Profile</span>
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>

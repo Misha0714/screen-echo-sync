@@ -4,9 +4,10 @@ import BottomNav from "@/components/BottomNav";
 import AddPostDialog from "@/components/AddPostDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, TrendingUp, Users, Search, Film, Calendar, Bell, Plus } from "lucide-react";
+import { Sparkles, TrendingUp, Users, Search, Film, Calendar, Bell } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 type FeedFilter = "forYou" | "trending" | "friends";
 
@@ -243,9 +244,11 @@ const Index = () => {
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex gap-4 pb-4">
             {trendingMovies.map((movie) => (
-              <div key={movie.title} className="w-[160px] flex-shrink-0">
-                <MovieCard {...movie} />
-              </div>
+              <Link key={movie.title} to={`/movie/${movie.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                <div className="w-[160px] flex-shrink-0">
+                  <MovieCard {...movie} />
+                </div>
+              </Link>
             ))}
           </div>
           <ScrollBar orientation="horizontal" />
@@ -267,9 +270,11 @@ const Index = () => {
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex gap-4 pb-4">
             {trendingMovies.map((movie) => (
-              <div key={movie.title} className="w-[160px] flex-shrink-0">
-                <MovieCard {...movie} />
-              </div>
+              <Link key={movie.title} to={`/movie/${movie.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                <div className="w-[160px] flex-shrink-0">
+                  <MovieCard {...movie} />
+                </div>
+              </Link>
             ))}
           </div>
           <ScrollBar orientation="horizontal" />

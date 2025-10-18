@@ -3,10 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Star, Upload, UserPlus, X, Image as ImageIcon } from "lucide-react";
+import { Search, Star, UserPlus, X, Image as ImageIcon, Lock, Globe } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { haptic } from "@/lib/haptic";
 
 interface AddPostDialogProps {
   open: boolean;
@@ -14,10 +17,46 @@ interface AddPostDialogProps {
 }
 
 const mockMovies = [
-  { id: 1, title: "Past Lives", year: "2023", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop" },
-  { id: 2, title: "Everything Everywhere All at Once", year: "2022", poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop" },
-  { id: 3, title: "The Lighthouse", year: "2019", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop" },
-  { id: 4, title: "Amélie", year: "2001", poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop" },
+  { 
+    id: 1, 
+    title: "Past Lives", 
+    year: "2023", 
+    poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop",
+    genres: ["Drama", "Romance"],
+    director: "Celine Song",
+    reviewCount: 234,
+    avgRating: 4.7,
+  },
+  { 
+    id: 2, 
+    title: "Everything Everywhere All at Once", 
+    year: "2022", 
+    poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop",
+    genres: ["Action", "Sci-Fi", "Comedy"],
+    director: "Daniel Kwan, Daniel Scheinert",
+    reviewCount: 1823,
+    avgRating: 4.9,
+  },
+  { 
+    id: 3, 
+    title: "The Lighthouse", 
+    year: "2019", 
+    poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop",
+    genres: ["Horror", "Drama"],
+    director: "Robert Eggers",
+    reviewCount: 1243,
+    avgRating: 4.3,
+  },
+  { 
+    id: 4, 
+    title: "Amélie", 
+    year: "2001", 
+    poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop",
+    genres: ["Romance", "Comedy"],
+    director: "Jean-Pierre Jeunet",
+    reviewCount: 2341,
+    avgRating: 4.8,
+  },
 ];
 
 const mockFriends = [
@@ -36,12 +75,14 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
   const [taggedFriends, setTaggedFriends] = useState<any[]>([]);
   const [showFriendSearch, setShowFriendSearch] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [isPublic, setIsPublic] = useState(true);
 
   const filteredMovies = mockMovies.filter(movie =>
     movie.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleSelectMovie = (movie: any) => {
+    haptic.light();
     setSelectedMovie(movie);
     setStep("compose");
   };
@@ -70,9 +111,11 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
   };
 
   const handlePost = () => {
+    haptic.success();
+    const visibility = isPublic ? "public" : "friends only";
     toast({
       title: "Post shared!",
-      description: "Your movie review has been posted to your feed.",
+      description: `Your movie review has been posted as ${visibility}.`,
     });
     // Reset form
     setStep("search");
@@ -82,6 +125,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
     setReview("");
     setTaggedFriends([]);
     setPhotos([]);
+    setIsPublic(true);
     onOpenChange(false);
   };
 
@@ -112,16 +156,30 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                   <button
                     key={movie.id}
                     onClick={() => handleSelectMovie(movie)}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors neon-border-subtle"
                   >
                     <img
                       src={movie.poster}
                       alt={movie.title}
-                      className="w-12 h-18 object-cover rounded"
+                      className="w-12 h-18 object-cover rounded poster-glow"
                     />
-                    <div className="text-left">
+                    <div className="text-left flex-1">
                       <p className="font-semibold">{movie.title}</p>
-                      <p className="text-sm text-muted-foreground">{movie.year}</p>
+                      <p className="text-sm text-muted-foreground mb-1">{movie.year} • {movie.director}</p>
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {movie.genres.slice(0, 2).map((genre) => (
+                          <Badge key={genre} variant="secondary" className="text-xs">
+                            {genre}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Star className="w-3 h-3 text-primary fill-primary" />
+                          {movie.avgRating}
+                        </span>
+                        <span>{movie.reviewCount} reviews</span>
+                      </div>
                     </div>
                   </button>
                 ))}
@@ -261,6 +319,39 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                     />
                     <ImageIcon className="w-6 h-6 text-muted-foreground" />
                   </label>
+                </div>
+              </div>
+
+              {/* Privacy Setting */}
+              <div>
+                <label className="text-sm font-semibold mb-3 block">Privacy</label>
+                <div className="flex items-center justify-between p-4 bg-card/50 rounded-lg border border-border neon-border-subtle">
+                  <div className="flex items-center gap-3">
+                    {isPublic ? (
+                      <>
+                        <Globe className="w-5 h-5 text-primary" />
+                        <div>
+                          <p className="font-medium text-foreground">Public</p>
+                          <p className="text-xs text-muted-foreground">Anyone can see this review</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-5 h-5 text-secondary" />
+                        <div>
+                          <p className="font-medium text-foreground">Friends Only</p>
+                          <p className="text-xs text-muted-foreground">Only your friends can see this</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <Switch
+                    checked={isPublic}
+                    onCheckedChange={(checked) => {
+                      haptic.light();
+                      setIsPublic(checked);
+                    }}
+                  />
                 </div>
               </div>
 

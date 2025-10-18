@@ -263,15 +263,15 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                   haptic.light();
                   handleFinishComparison();
                 }}
-                className="flex-1 p-6 border-2 border-border rounded-2xl hover:border-primary transition-all min-h-[200px] flex flex-col items-center justify-center gap-3"
+                className="flex-1 p-6 border-2 border-border rounded-2xl hover:border-primary transition-all h-[280px] flex flex-col items-center justify-center gap-3"
               >
                 <img
                   src={comparisonMovies[0].poster}
                   alt={comparisonMovies[0].title}
-                  className="w-20 h-30 object-cover rounded-lg"
+                  className="w-24 h-36 object-cover rounded-lg"
                 />
                 <div className="text-center">
-                  <h3 className="font-bold text-lg mb-1">{comparisonMovies[0].title}</h3>
+                  <h3 className="font-bold text-base mb-1 line-clamp-2">{comparisonMovies[0].title}</h3>
                   <p className="text-sm text-muted-foreground">{comparisonMovies[0].year}</p>
                 </div>
               </button>
@@ -287,15 +287,15 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                   haptic.light();
                   handleFinishComparison();
                 }}
-                className="flex-1 p-6 border-2 border-border rounded-2xl hover:border-primary transition-all min-h-[200px] flex flex-col items-center justify-center gap-3"
+                className="flex-1 p-6 border-2 border-border rounded-2xl hover:border-primary transition-all h-[280px] flex flex-col items-center justify-center gap-3"
               >
                 <img
                   src={comparisonMovies[1].poster}
                   alt={comparisonMovies[1].title}
-                  className="w-20 h-30 object-cover rounded-lg"
+                  className="w-24 h-36 object-cover rounded-lg"
                 />
                 <div className="text-center">
-                  <h3 className="font-bold text-lg mb-1">{comparisonMovies[1].title}</h3>
+                  <h3 className="font-bold text-base mb-1 line-clamp-2">{comparisonMovies[1].title}</h3>
                   <p className="text-sm text-muted-foreground">
                     {comparisonMovies[1].year} • {comparisonMovies[1].rating}
                   </p>

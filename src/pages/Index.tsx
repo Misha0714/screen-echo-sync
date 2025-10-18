@@ -2,8 +2,9 @@ import Navigation from "@/components/Navigation";
 import MovieCard from "@/components/MovieCard";
 import ReviewCard from "@/components/ReviewCard";
 import { Button } from "@/components/ui/button";
-import { Sparkles, TrendingUp, Users } from "lucide-react";
-import heroImage from "@/assets/hero-theater.jpg";
+import { Input } from "@/components/ui/input";
+import { Sparkles, TrendingUp, Users, Search, Film, Calendar, Bell } from "lucide-react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const Index = () => {
   const trendingMovies = [
@@ -64,83 +65,168 @@ const Index = () => {
     },
   ];
 
+  const vibes = ["Cozy", "Intense", "Nostalgic", "Uplifting", "Chaotic", "Existential"];
+
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      {/* Hero Section */}
-      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt="Cinema"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-hero" />
-        </div>
-        
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto animate-fade-in">
-          <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Your Vibe.
-            </span>
-            <br />
-            <span className="text-foreground">Your Cinema.</span>
-          </h1>
-          <p className="text-xl text-foreground/80 mb-8 max-w-2xl mx-auto">
-            Discover, review, and share movies that match your mood. Join a community that gets the vibe.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Button size="lg" className="bg-gradient-primary hover:opacity-90 text-lg px-8">
-              <Sparkles className="w-5 h-5 mr-2" />
-              Get Started
-            </Button>
-            <Button size="lg" variant="outline" className="border-primary/50 hover:bg-primary/10 text-lg px-8">
-              Explore Vibes
-            </Button>
+    <div className="min-h-screen bg-background pb-20">
+      {/* Mobile-First Header */}
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Film className="w-7 h-7 text-primary" />
+              <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                Rewind
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+                <Calendar className="w-5 h-5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+                <Bell className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+          
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search movies, friends, etc."
+              className="pl-10 bg-muted/50"
+            />
           </div>
         </div>
-      </section>
+      </header>
+
+      {/* Quick Action Pills */}
+      <div className="container mx-auto px-4 py-4">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="flex gap-3">
+            <Button className="rounded-full bg-primary hover:bg-primary/90 flex-shrink-0">
+              <Sparkles className="w-4 h-4 mr-2" />
+              For You
+            </Button>
+            <Button variant="outline" className="rounded-full flex-shrink-0">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Trending
+            </Button>
+            <Button variant="outline" className="rounded-full flex-shrink-0">
+              <Users className="w-4 h-4 mr-2" />
+              Friends
+            </Button>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
+
+      {/* Vibes Filter */}
+      <div className="container mx-auto px-4 pb-4">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="flex gap-2">
+            {vibes.map((vibe) => (
+              <Button 
+                key={vibe} 
+                variant="secondary" 
+                size="sm" 
+                className="rounded-full flex-shrink-0"
+              >
+                {vibe}
+              </Button>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
 
       {/* Trending Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="flex items-center gap-3 mb-8">
-          <TrendingUp className="w-6 h-6 text-primary" />
-          <h2 className="text-3xl font-bold text-foreground">Trending Now</h2>
+      <section className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-primary" />
+            <h2 className="text-xl font-bold text-foreground">Trending Now</h2>
+          </div>
+          <Button variant="ghost" size="sm" className="text-primary">
+            See all
+          </Button>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {trendingMovies.map((movie) => (
-            <MovieCard key={movie.title} {...movie} />
-          ))}
-        </div>
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="flex gap-4 pb-4">
+            {trendingMovies.map((movie) => (
+              <div key={movie.title} className="w-[160px] flex-shrink-0">
+                <MovieCard {...movie} />
+              </div>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </section>
 
       {/* Recommended Section */}
-      <section className="container mx-auto px-4 py-16 bg-card/30">
-        <div className="flex items-center gap-3 mb-8">
-          <Users className="w-6 h-6 text-accent" />
-          <h2 className="text-3xl font-bold text-foreground">Recommended for You</h2>
+      <section className="container mx-auto px-4 py-6 bg-card/30">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-accent" />
+            <h2 className="text-xl font-bold text-foreground">Recommended for You</h2>
+          </div>
+          <Button variant="ghost" size="sm" className="text-primary">
+            See all
+          </Button>
         </div>
-        <p className="text-muted-foreground mb-6">Based on what your friends watched and your preferences</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {trendingMovies.map((movie) => (
-            <MovieCard key={movie.title} {...movie} />
-          ))}
-        </div>
+        <p className="text-sm text-muted-foreground mb-4">Based on what your friends watched</p>
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="flex gap-4 pb-4">
+            {trendingMovies.map((movie) => (
+              <div key={movie.title} className="w-[160px] flex-shrink-0">
+                <MovieCard {...movie} />
+              </div>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </section>
 
       {/* Reviews Feed */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="flex items-center gap-3 mb-8">
-          <Sparkles className="w-6 h-6 text-secondary" />
-          <h2 className="text-3xl font-bold text-foreground">Recent Reviews</h2>
+      <section className="container mx-auto px-4 py-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles className="w-5 h-5 text-secondary" />
+          <h2 className="text-xl font-bold text-foreground">Your Feed</h2>
         </div>
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="space-y-4">
           {recentReviews.map((review) => (
             <ReviewCard key={review.movieTitle} {...review} />
           ))}
         </div>
       </section>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-around py-3">
+            <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
+              <Film className="w-5 h-5 text-primary" />
+              <span className="text-xs text-primary font-medium">Feed</span>
+            </Button>
+            <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
+              <TrendingUp className="w-5 h-5" />
+              <span className="text-xs">Discover</span>
+            </Button>
+            <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
+              <Search className="w-5 h-5" />
+              <span className="text-xs">Search</span>
+            </Button>
+            <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
+              <Users className="w-5 h-5" />
+              <span className="text-xs">Friends</span>
+            </Button>
+            <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
+              <Sparkles className="w-5 h-5" />
+              <span className="text-xs">Profile</span>
+            </Button>
+          </div>
+        </div>
+      </nav>
 
     </div>
   );

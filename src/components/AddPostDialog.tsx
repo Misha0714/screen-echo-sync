@@ -281,7 +281,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
 
               {/* Review */}
               <div>
-                <label className="text-sm font-semibold mb-2 block">Your Review</label>
+                <label className="text-sm font-semibold mb-2 block">Your Review (Optional)</label>
                 <Textarea
                   placeholder="Share your thoughts about this movie..."
                   value={review}
@@ -397,7 +397,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
               <Button
                 onClick={handlePost}
                 className="w-full"
-                disabled={!rating || !review}
+                disabled={!rating}
               >
                 Post to Feed
               </Button>

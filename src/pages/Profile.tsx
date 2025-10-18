@@ -70,7 +70,7 @@ const Profile = () => {
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-foreground">🔒</div>
-              <div className="text-sm text-muted-foreground">Rank on CineVibe</div>
+              <div className="text-sm text-muted-foreground">Rank on Rewind</div>
             </div>
           </div>
         </div>
@@ -106,7 +106,7 @@ const Profile = () => {
           <Card className="p-6 bg-card border-border">
             <div className="flex items-center gap-3 mb-2">
               <Trophy className="w-6 h-6 text-primary" />
-              <span className="text-sm text-muted-foreground">Rank on CineVibe</span>
+              <span className="text-sm text-muted-foreground">Rank on Rewind</span>
             </div>
             <div className="text-sm text-muted-foreground">🔒</div>
           </Card>

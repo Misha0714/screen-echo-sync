@@ -2,7 +2,7 @@ import Navigation from "@/components/Navigation";
 import MovieCard from "@/components/MovieCard";
 import ReviewCard from "@/components/ReviewCard";
 import { Button } from "@/components/ui/button";
-import { Sparkles, TrendingUp } from "lucide-react";
+import { Sparkles, TrendingUp, Users } from "lucide-react";
 import heroImage from "@/assets/hero-theater.jpg";
 
 const Index = () => {
@@ -115,6 +115,20 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Recommended Section */}
+      <section className="container mx-auto px-4 py-16 bg-card/30">
+        <div className="flex items-center gap-3 mb-8">
+          <Users className="w-6 h-6 text-accent" />
+          <h2 className="text-3xl font-bold text-foreground">Recommended for You</h2>
+        </div>
+        <p className="text-muted-foreground mb-6">Based on what your friends watched and your preferences</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {trendingMovies.map((movie) => (
+            <MovieCard key={movie.title} {...movie} />
+          ))}
+        </div>
+      </section>
+
       {/* Reviews Feed */}
       <section className="container mx-auto px-4 py-16">
         <div className="flex items-center gap-3 mb-8">
@@ -138,7 +152,7 @@ const Index = () => {
             Join thousands of cinephiles sharing their movie moments, building rankings, and discovering what to watch next.
           </p>
           <Button size="lg" variant="secondary" className="text-lg px-8">
-            Join CineVibe
+            Join Rewind
           </Button>
         </div>
       </section>

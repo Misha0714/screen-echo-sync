@@ -10,7 +10,7 @@ const Navigation = () => {
           <div className="flex items-center gap-2">
             <Film className="w-6 h-6 text-primary" />
             <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              CineVibe
+              Rewind
             </span>
           </div>
           

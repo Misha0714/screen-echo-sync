@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import VibeTag from "./VibeTag";
 import { haptic } from "@/lib/haptic";
 
@@ -19,6 +20,7 @@ interface ReviewCardProps {
   moviePoster: string;
   taggedFriends?: { name: string; avatar: string }[];
   photos?: string[];
+  userUsername?: string; // username for profile link
 }
 
 const ReviewCard = ({
@@ -34,11 +36,15 @@ const ReviewCard = ({
   moviePoster,
   taggedFriends = [],
   photos = [],
+  userUsername,
 }: ReviewCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
   const [likeCount, setLikeCount] = useState(likes);
+
+  // Generate username from name if not provided
+  const username = userUsername || userName.toLowerCase().replace(/\s+/g, '');
 
   const reactions = ["❤️", "😂", "😮", "😢", "😍", "🔥"];
 
@@ -61,14 +67,20 @@ const ReviewCard = ({
   return (
     <Card className="bg-card border-border p-6 hover:border-primary/30 transition-all duration-300 neon-card">
       <div className="flex items-start gap-4 mb-4">
-        <Avatar className="w-12 h-12 border-2 border-primary/20">
-          <AvatarImage src={userAvatar} alt={userName} />
-          <AvatarFallback>{userName[0]}</AvatarFallback>
-        </Avatar>
+        <Link to={`/profile/${username}`} onClick={() => haptic.light()}>
+          <Avatar className="w-12 h-12 border-2 border-primary/20 cursor-pointer hover:border-primary/40 transition-all">
+            <AvatarImage src={userAvatar} alt={userName} />
+            <AvatarFallback>{userName[0]}</AvatarFallback>
+          </Avatar>
+        </Link>
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <p className="font-semibold text-foreground">{userName}</p>
+              <Link to={`/profile/${username}`} onClick={() => haptic.light()}>
+                <p className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer">
+                  {userName}
+                </p>
+              </Link>
               <p className="text-sm text-muted-foreground">reviewed</p>
             </div>
             <div className="flex items-center gap-1">

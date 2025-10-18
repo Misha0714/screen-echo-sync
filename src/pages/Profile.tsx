@@ -1,18 +1,58 @@
 import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Share2, CheckCircle2, Bookmark, Heart, Trophy, Flame, Settings } from "lucide-react";
+import { Share2, CheckCircle2, Bookmark, Heart, Trophy, Flame, Settings, ArrowLeft } from "lucide-react";
 import ReviewCard from "@/components/ReviewCard";
 import { Link } from "react-router-dom";
 import FollowersModal from "@/components/FollowersModal";
 import { haptic } from "@/lib/haptic";
 
 const Profile = () => {
+  const { username } = useParams();
+  const navigate = useNavigate();
   const [followersModalOpen, setFollowersModalOpen] = useState(false);
   const [followingModalOpen, setFollowingModalOpen] = useState(false);
+
+  // Determine if viewing own profile or another user's
+  const isOwnProfile = !username; // If no username param, it's the current user's profile
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false); // Mock - would come from API
+
+  // Mock user data - in production this would come from an API based on username
+  const profileData = username ? {
+    username: username,
+    displayName: "Sarah Johnson",
+    bio: "cinephile • love indie films and foreign cinema",
+    memberSince: "January 2025",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
+    followers: 142,
+    following: 89,
+    watched: 234,
+    watchlist: 45,
+    favorites: 23,
+    isPrivate: false,
+  } : {
+    username: "alex_cinema",
+    displayName: "Alex Chen",
+    bio: "all my movie picks finally have a purpose",
+    memberSince: "February 2025",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
+    followers: 24,
+    following: 23,
+    watched: 58,
+    watchlist: 12,
+    favorites: 8,
+    isPrivate: false,
+  };
+
+  const handleFollowToggle = () => {
+    haptic.light();
+    setIsFollowing(!isFollowing);
+  };
 
   // Mock data for followers/following
   const followers = [
@@ -59,10 +99,19 @@ const Profile = () => {
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b neon-border-subtle">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold">Profile</h1>
-            <Button variant="ghost" size="icon">
-              <Settings className="w-5 h-5" />
-            </Button>
+            {!isOwnProfile && (
+              <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            )}
+            <h1 className="text-xl font-bold">{isOwnProfile ? "Profile" : `@${profileData.username}`}</h1>
+            {isOwnProfile ? (
+              <Button variant="ghost" size="icon">
+                <Settings className="w-5 h-5" />
+              </Button>
+            ) : (
+              <div className="w-10" />
+            )}
           </div>
         </div>
       </header>
@@ -71,20 +120,38 @@ const Profile = () => {
         {/* Profile Header */}
         <div className="text-center mb-8">
           <Avatar className="w-32 h-32 mx-auto mb-4 border-4 border-primary/20 neon-border-subtle">
-            <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Alex Chen" />
-            <AvatarFallback>AC</AvatarFallback>
+            <AvatarImage src={profileData.avatar} alt={profileData.displayName} />
+            <AvatarFallback>{profileData.displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           
-          <h1 className="text-2xl font-bold text-foreground mb-1">@alex_cinema</h1>
-          <p className="text-sm text-muted-foreground mb-2">Member since February 2025</p>
-          <p className="text-foreground/80 mb-6">all my movie picks finally have a purpose</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">@{profileData.username}</h1>
+          <p className="text-sm text-muted-foreground mb-2">Member since {profileData.memberSince}</p>
+          <p className="text-foreground/80 mb-6">{profileData.bio}</p>
           
           <div className="flex gap-3 justify-center mb-6">
-            <Button variant="outline" className="border-border">Edit profile</Button>
-            <Button variant="outline" className="border-border gap-2">
-              <Share2 className="w-4 h-4" />
-              Share profile
-            </Button>
+            {isOwnProfile ? (
+              <>
+                <Button variant="outline" className="border-border">Edit profile</Button>
+                <Button variant="outline" className="border-border gap-2">
+                  <Share2 className="w-4 h-4" />
+                  Share profile
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  variant={isFollowing ? "outline" : "default"}
+                  className="border-border"
+                  onClick={handleFollowToggle}
+                >
+                  {isFollowing ? "Unfollow" : "Follow"}
+                </Button>
+                <Button variant="outline" className="border-border gap-2">
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Stats */}
@@ -96,7 +163,7 @@ const Profile = () => {
               }}
               className="text-center cursor-pointer hover:opacity-70 transition-opacity"
             >
-              <div className="text-2xl font-bold text-foreground">24</div>
+              <div className="text-2xl font-bold text-foreground">{profileData.followers}</div>
               <div className="text-sm text-muted-foreground">Followers</div>
             </button>
             <button
@@ -106,7 +173,7 @@ const Profile = () => {
               }}
               className="text-center cursor-pointer hover:opacity-70 transition-opacity"
             >
-              <div className="text-2xl font-bold text-foreground">23</div>
+              <div className="text-2xl font-bold text-foreground">{profileData.following}</div>
               <div className="text-sm text-muted-foreground">Following</div>
             </button>
             <div className="text-center">
@@ -116,38 +183,46 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Collection Sections */}
-        <div className="space-y-4 mb-8">
-          <Link to="/collection/watched">
-            <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-all cursor-pointer neon-card">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-6 h-6 text-primary neon-glow-primary" />
-                <span className="font-semibold text-foreground">Watched</span>
-              </div>
-              <span className="text-2xl font-bold text-foreground">58</span>
-            </div>
-          </Link>
+        {profileData.isPrivate && !isOwnProfile ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🔒</div>
+            <h2 className="text-2xl font-bold mb-2">This account is private</h2>
+            <p className="text-muted-foreground">Follow this account to see their activity</p>
+          </div>
+        ) : (
+          <>
+            {/* Collection Sections */}
+            <div className="space-y-4 mb-8">
+              <Link to="/collection/watched">
+                <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-all cursor-pointer neon-card">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-6 h-6 text-primary neon-glow-primary" />
+                    <span className="font-semibold text-foreground">Watched</span>
+                  </div>
+                  <span className="text-2xl font-bold text-foreground">{profileData.watched}</span>
+                </div>
+              </Link>
 
-          <Link to="/collection/watchlist">
-            <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-all cursor-pointer neon-card">
-              <div className="flex items-center gap-3">
-                <Bookmark className="w-6 h-6 text-secondary neon-glow-secondary" />
-                <span className="font-semibold text-foreground">Want to Watch</span>
-              </div>
-              <span className="text-2xl font-bold text-foreground">12</span>
-            </div>
-          </Link>
+              <Link to="/collection/watchlist">
+                <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-all cursor-pointer neon-card">
+                  <div className="flex items-center gap-3">
+                    <Bookmark className="w-6 h-6 text-secondary neon-glow-secondary" />
+                    <span className="font-semibold text-foreground">Want to Watch</span>
+                  </div>
+                  <span className="text-2xl font-bold text-foreground">{profileData.watchlist}</span>
+                </div>
+              </Link>
 
-          <Link to="/collection/favorites">
-            <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-all cursor-pointer neon-card">
-              <div className="flex items-center gap-3">
-                <Heart className="w-6 h-6 text-accent neon-glow-accent" />
-                <span className="font-semibold text-foreground">Favorites</span>
-              </div>
-              <span className="text-2xl font-bold text-foreground">8</span>
+              <Link to="/collection/favorites">
+                <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-all cursor-pointer neon-card">
+                  <div className="flex items-center gap-3">
+                    <Heart className="w-6 h-6 text-accent neon-glow-accent" />
+                    <span className="font-semibold text-foreground">Favorites</span>
+                  </div>
+                  <span className="text-2xl font-bold text-foreground">{profileData.favorites}</span>
+                </div>
+              </Link>
             </div>
-          </Link>
-        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4 mb-8">
@@ -219,12 +294,14 @@ const Profile = () => {
           </div>
         </Card>
 
-        {/* Recent Activity Tab */}
-        <Tabs defaultValue="activity" className="w-full">
-          <TabsList className="w-full mb-6">
-            <TabsTrigger value="activity" className="flex-1">Recent Activity</TabsTrigger>
-            <TabsTrigger value="taste" className="flex-1">Your Taste</TabsTrigger>
-          </TabsList>
+            {/* Recent Activity Tab */}
+            <Tabs defaultValue="activity" className="w-full">
+              <TabsList className="w-full mb-6">
+                <TabsTrigger value="activity" className="flex-1">Recent Activity</TabsTrigger>
+                <TabsTrigger value="taste" className="flex-1">
+                  {isOwnProfile ? "Your Taste" : "Their Taste"}
+                </TabsTrigger>
+              </TabsList>
 
           <TabsContent value="activity" className="space-y-6">
             {recentReviews.map((review) => (
@@ -316,7 +393,9 @@ const Profile = () => {
               </div>
             </div>
           </TabsContent>
-        </Tabs>
+            </Tabs>
+          </>
+        )}
       </div>
 
       <FollowersModal

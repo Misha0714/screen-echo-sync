@@ -14,6 +14,7 @@ import AddPostDialog from "@/components/AddPostDialog";
 interface Review {
   id: number;
   userName: string;
+  userUsername: string;
   userAvatar: string;
   rating: number;
   review: string;
@@ -63,6 +64,7 @@ const MovieDetails = () => {
     {
       id: 1,
       userName: "Sarah Johnson",
+      userUsername: "sarahjmovies",
       userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
       rating: 5,
       review: "A quietly devastating exploration of paths not taken. The film captures the ache of 'what if' with such grace. Every frame feels like a memory you can't quite hold onto.",
@@ -75,6 +77,7 @@ const MovieDetails = () => {
     {
       id: 2,
       userName: "Alex Chen",
+      userUsername: "alexchen",
       userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
       rating: 5,
       review: "One of the best films about love and connection I've seen. The performances are subtle yet powerful. Left the theater in tears.",
@@ -87,6 +90,7 @@ const MovieDetails = () => {
     {
       id: 3,
       userName: "MovieBuff2023",
+      userUsername: "moviebuff2023",
       userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=MovieBuff",
       rating: 4,
       review: "Beautiful cinematography and a touching story. Some pacing issues but overall a great watch.",
@@ -263,14 +267,20 @@ const MovieDetails = () => {
               <Card key={review.id}>
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3 mb-3">
-                    <Avatar className="w-10 h-10 border-2 border-primary/20">
-                      <AvatarImage src={review.userAvatar} alt={review.userName} />
-                      <AvatarFallback>{review.userName[0]}</AvatarFallback>
-                    </Avatar>
+                    <Link to={`/profile/${review.userUsername}`} onClick={() => haptic.light()}>
+                      <Avatar className="w-10 h-10 border-2 border-primary/20 cursor-pointer hover:border-primary/40 transition-all">
+                        <AvatarImage src={review.userAvatar} alt={review.userName} />
+                        <AvatarFallback>{review.userName[0]}</AvatarFallback>
+                      </Avatar>
+                    </Link>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="font-semibold text-sm">{review.userName}</p>
+                        <Link to={`/profile/${review.userUsername}`} onClick={() => haptic.light()}>
+                          <p className="font-semibold text-sm hover:text-primary transition-colors cursor-pointer">
+                            {review.userName}
+                          </p>
+                        </Link>
                         <div className="flex items-center gap-0.5">
                           {[...Array(5)].map((_, i) => (
                             <Star

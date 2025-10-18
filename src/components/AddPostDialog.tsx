@@ -258,8 +258,8 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
               <div className="p-4 space-y-3">
                 {/* Rating */}
                 <div>
-                  <h4 className="text-sm font-semibold mb-2">How was it?</h4>
-                  <div className="flex gap-2">
+                  <h4 className="text-sm font-semibold mb-2 text-center">How was it?</h4>
+                  <div className="flex gap-2 justify-center">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
@@ -291,53 +291,38 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                 </div>
 
                 {/* Who did you watch with */}
-                <div className="bg-card rounded-lg border">
-                  <button
-                    onClick={() => setShowFriendSearch(!showFriendSearch)}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-accent/50 transition-colors"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    <span className="flex-1 text-left text-sm font-medium">Who did you watch with?</span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                  
-                  {taggedFriends.length > 0 && (
-                    <div className="px-3 pb-2 flex flex-wrap gap-1.5">
-                      {taggedFriends.map((friend) => (
-                        <div
-                          key={friend.id}
-                          className="flex items-center gap-1.5 bg-accent px-2 py-1 rounded-full"
-                        >
-                          <Avatar className="w-4 h-4">
-                            <AvatarImage src={friend.avatar} />
-                            <AvatarFallback className="text-xs">{friend.name[0]}</AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs">{friend.name}</span>
-                          <button onClick={() => handleRemoveTag(friend.id)}>
-                            <X className="w-3 h-3" />
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Who did you watch with?</h4>
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-2 pb-2">
+                      {mockFriends.map((friend) => {
+                        const isTagged = taggedFriends.find(f => f.id === friend.id);
+                        return (
+                          <button
+                            key={friend.id}
+                            onClick={() => {
+                              haptic.light();
+                              if (isTagged) {
+                                handleRemoveTag(friend.id);
+                              } else {
+                                handleTagFriend(friend);
+                              }
+                            }}
+                            className={cn(
+                              "flex flex-col items-center gap-1 p-2 rounded-lg border transition-colors shrink-0",
+                              isTagged ? "bg-primary/10 border-primary" : "bg-card border-border hover:bg-accent"
+                            )}
+                          >
+                            <Avatar className="w-12 h-12">
+                              <AvatarImage src={friend.avatar} />
+                              <AvatarFallback className="text-xs">{friend.name[0]}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs font-medium text-center">{friend.name.split(' ')[0]}</span>
                           </button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
-                  )}
-
-                  {showFriendSearch && (
-                    <div className="px-3 pb-3 space-y-1 border-t pt-2">
-                      {mockFriends.map((friend) => (
-                        <button
-                          key={friend.id}
-                          onClick={() => handleTagFriend(friend)}
-                          className="w-full flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors"
-                        >
-                          <Avatar className="w-6 h-6">
-                            <AvatarImage src={friend.avatar} />
-                            <AvatarFallback className="text-xs">{friend.name[0]}</AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs">{friend.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  </ScrollArea>
                 </div>
 
                 {/* Add Photos */}

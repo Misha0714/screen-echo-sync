@@ -47,8 +47,8 @@ const Profile = () => {
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
     followers: 3,
     following: 2,
-    watched: 58,
-    watchlist: 12,
+    watched: 6,
+    watchlist: 2,
     favorites: 8,
     isPrivate: false,
   });

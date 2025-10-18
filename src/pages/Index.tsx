@@ -8,8 +8,11 @@ import { Sparkles, TrendingUp, Users, Search, Film, Calendar, Bell, Plus } from 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useState } from "react";
 
+type FeedFilter = "forYou" | "trending" | "friends";
+
 const Index = () => {
   const [isAddPostOpen, setIsAddPostOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<FeedFilter>("forYou");
 
   const trendingMovies = [
     {
@@ -60,6 +63,7 @@ const Index = () => {
       photos: [
         "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=300&fit=crop",
       ],
+      isFollowing: true,
     },
     {
       userName: "Sam Rivera",
@@ -72,8 +76,59 @@ const Index = () => {
       likes: 512,
       comments: 89,
       moviePoster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop",
+      isFollowing: true,
+    },
+    {
+      userName: "Jordan Lee",
+      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan",
+      movieTitle: "The Grand Budapest Hotel",
+      movieYear: "2014",
+      rating: 5,
+      review: "Wes Anderson at his finest. Every frame is a painting, every line is poetry. The story is heartwarming and hilarious in equal measure.",
+      vibes: ["cozy", "nostalgic", "uplifting"] as const,
+      likes: 892,
+      comments: 156,
+      moviePoster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop",
+      isFollowing: false,
+    },
+    {
+      userName: "Taylor Kim",
+      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Taylor",
+      movieTitle: "Mad Max: Fury Road",
+      movieYear: "2015",
+      rating: 5,
+      review: "Non-stop adrenaline from start to finish. A masterclass in action filmmaking. Furiosa is an absolute icon.",
+      vibes: ["intense", "chaotic", "uplifting"] as const,
+      likes: 1243,
+      comments: 203,
+      moviePoster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=200&h=300&fit=crop",
+      isFollowing: false,
+    },
+    {
+      userName: "Casey Morgan",
+      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Casey",
+      movieTitle: "Her",
+      movieYear: "2013",
+      rating: 4,
+      review: "A beautifully melancholic look at love and loneliness in the digital age. Joaquin Phoenix gives a vulnerable performance.",
+      vibes: ["existential", "nostalgic"] as const,
+      likes: 45,
+      comments: 12,
+      moviePoster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop",
+      isFollowing: true,
     },
   ];
+
+  const filteredReviews = recentReviews.filter((review) => {
+    if (activeFilter === "trending") {
+      const totalEngagement = review.likes + review.comments;
+      return totalEngagement > 200; // High engagement threshold
+    }
+    if (activeFilter === "friends") {
+      return review.isFollowing;
+    }
+    return true; // "forYou" shows all
+  });
 
   const vibes = ["Cozy", "Intense", "Nostalgic", "Uplifting", "Chaotic", "Existential"];
 
@@ -114,15 +169,39 @@ const Index = () => {
       <div className="container mx-auto px-4 py-4">
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex gap-3">
-            <Button className="rounded-full bg-primary hover:bg-primary/90 flex-shrink-0">
+            <Button 
+              onClick={() => setActiveFilter("forYou")}
+              className={`rounded-full flex-shrink-0 transition-all ${
+                activeFilter === "forYou" 
+                  ? "bg-primary hover:bg-primary/90" 
+                  : "bg-transparent border border-border hover:bg-muted"
+              }`}
+              variant={activeFilter === "forYou" ? "default" : "outline"}
+            >
               <Sparkles className="w-4 h-4 mr-2" />
               For You
             </Button>
-            <Button variant="outline" className="rounded-full flex-shrink-0">
+            <Button 
+              onClick={() => setActiveFilter("trending")}
+              className={`rounded-full flex-shrink-0 transition-all ${
+                activeFilter === "trending" 
+                  ? "bg-primary hover:bg-primary/90" 
+                  : "bg-transparent border border-border hover:bg-muted"
+              }`}
+              variant={activeFilter === "trending" ? "default" : "outline"}
+            >
               <TrendingUp className="w-4 h-4 mr-2" />
               Trending
             </Button>
-            <Button variant="outline" className="rounded-full flex-shrink-0">
+            <Button 
+              onClick={() => setActiveFilter("friends")}
+              className={`rounded-full flex-shrink-0 transition-all ${
+                activeFilter === "friends" 
+                  ? "bg-primary hover:bg-primary/90" 
+                  : "bg-transparent border border-border hover:bg-muted"
+              }`}
+              variant={activeFilter === "friends" ? "default" : "outline"}
+            >
               <Users className="w-4 h-4 mr-2" />
               Friends
             </Button>
@@ -200,14 +279,29 @@ const Index = () => {
       {/* Reviews Feed */}
       <section className="container mx-auto px-4 py-6">
         <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-5 h-5 text-secondary" />
-          <h2 className="text-xl font-bold text-foreground">Your Feed</h2>
+          {activeFilter === "forYou" && <Sparkles className="w-5 h-5 text-secondary" />}
+          {activeFilter === "trending" && <TrendingUp className="w-5 h-5 text-primary" />}
+          {activeFilter === "friends" && <Users className="w-5 h-5 text-accent" />}
+          <h2 className="text-xl font-bold text-foreground">
+            {activeFilter === "forYou" && "Your Feed"}
+            {activeFilter === "trending" && "Trending Posts"}
+            {activeFilter === "friends" && "Friends' Posts"}
+          </h2>
         </div>
-        <div className="space-y-4">
-          {recentReviews.map((review) => (
-            <ReviewCard key={review.movieTitle} {...review} />
-          ))}
-        </div>
+        {filteredReviews.length > 0 ? (
+          <div className="space-y-4 animate-fade-in">
+            {filteredReviews.map((review) => (
+              <ReviewCard key={`${review.userName}-${review.movieTitle}`} {...review} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 animate-fade-in">
+            <p className="text-muted-foreground">
+              {activeFilter === "trending" && "No trending posts at the moment. Check back later!"}
+              {activeFilter === "friends" && "No posts from friends yet. Follow more people to see their reviews!"}
+            </p>
+          </div>
+        )}
       </section>
 
       <AddPostDialog open={isAddPostOpen} onOpenChange={setIsAddPostOpen} />

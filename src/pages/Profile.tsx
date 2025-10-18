@@ -1,9 +1,9 @@
-import Navigation from "@/components/Navigation";
+import BottomNav from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Share2, CheckCircle2, Bookmark, Heart, Trophy, Flame } from "lucide-react";
+import { Share2, CheckCircle2, Bookmark, Heart, Trophy, Flame, Settings } from "lucide-react";
 import ReviewCard from "@/components/ReviewCard";
 
 const Profile = () => {
@@ -35,8 +35,18 @@ const Profile = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <div className="min-h-screen bg-background pb-20">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold">Profile</h1>
+            <Button variant="ghost" size="icon">
+              <Settings className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </header>
       
       <div className="container mx-auto px-4 pt-24 pb-12 max-w-4xl">
         {/* Profile Header */}
@@ -140,6 +150,8 @@ const Profile = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <BottomNav />
     </div>
   );
 };

@@ -271,7 +271,7 @@ const Profile = () => {
             <Trophy className="w-8 h-8 text-primary neon-glow-primary" />
             <div>
               <h2 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                2025 Watch Year Wrapped
+                2024 Watch Year Wrapped
               </h2>
               <p className="text-sm text-muted-foreground">Your viewing journey this year</p>
             </div>
@@ -293,7 +293,7 @@ const Profile = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold text-foreground mb-4">Top 3 Rated Titles of 2025</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Top 3 Rated Titles of 2024</h3>
             <div className="space-y-3">
               {[
                 { title: "The Last of Us", rating: 10, genre: "Drama, Sci-Fi", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop", type: "TV" },

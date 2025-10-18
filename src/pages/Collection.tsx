@@ -31,7 +31,7 @@ const Collection = () => {
         title: "Past Lives",
         year: "2023",
         poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop",
-        rating: 5,
+        rating: 10.0,
         type: "movie",
         genres: ["Drama", "Romance"],
       },
@@ -40,34 +40,34 @@ const Collection = () => {
         title: "The Last of Us",
         year: "2023",
         poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop",
-        rating: 5,
+        rating: 9.8,
         type: "tv",
         genres: ["Drama", "Sci-Fi"],
-      },
-      {
-        id: 3,
-        title: "The Lighthouse",
-        year: "2019",
-        poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop",
-        rating: 4,
-        type: "movie",
-        genres: ["Horror", "Drama"],
       },
       {
         id: 4,
         title: "Succession",
         year: "2018-2023",
         poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop",
-        rating: 5,
+        rating: 9.5,
         type: "tv",
         genres: ["Drama"],
+      },
+      {
+        id: 3,
+        title: "The Lighthouse",
+        year: "2019",
+        poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop",
+        rating: 8.8,
+        type: "movie",
+        genres: ["Horror", "Drama"],
       },
       {
         id: 5,
         title: "Amélie",
         year: "2001",
         poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop",
-        rating: 5,
+        rating: 8.4,
         type: "movie",
         genres: ["Romance", "Comedy"],
       },
@@ -76,7 +76,7 @@ const Collection = () => {
         title: "Breaking Bad",
         year: "2008-2013",
         poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=200&h=300&fit=crop",
-        rating: 5,
+        rating: 7.9,
         type: "tv",
         genres: ["Drama", "Thriller"],
       },
@@ -105,7 +105,7 @@ const Collection = () => {
         title: "The Last of Us",
         year: "2023",
         poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop",
-        rating: 5,
+        rating: 10.0,
         type: "tv",
         genres: ["Drama", "Sci-Fi"],
       },
@@ -114,7 +114,7 @@ const Collection = () => {
         title: "Past Lives",
         year: "2023",
         poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop",
-        rating: 5,
+        rating: 9.7,
         type: "movie",
         genres: ["Drama", "Romance"],
       },
@@ -123,7 +123,11 @@ const Collection = () => {
 
   const items = collections[collectionType || "watched"] || [];
   
-  const filteredItems = items.filter((item) => {
+  // Sort by rating (highest first) and filter by type
+  const sortedItems = [...items]
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  
+  const filteredItems = sortedItems.filter((item) => {
     if (filterType === "all") return true;
     return item.type === filterType;
   });
@@ -179,96 +183,77 @@ const Collection = () => {
       <div className="container mx-auto px-4 py-6">
         {filteredItems.length > 0 ? (
           <div className="space-y-4 animate-fade-in">
-            {filteredItems.map((item, index) => {
-              // Color coding for top 3
-              const getRankColor = (rank: number) => {
-                if (rank === 0) return "text-yellow-500"; // Gold
-                if (rank === 1) return "text-gray-400"; // Silver
-                if (rank === 2) return "text-orange-600"; // Bronze
-                return "text-foreground";
-              };
-
-              const getRankBorderColor = (rank: number) => {
-                if (rank === 0) return "border-yellow-500/50"; // Gold
-                if (rank === 1) return "border-gray-400/50"; // Silver
-                if (rank === 2) return "border-orange-600/50"; // Bronze
-                return "border-primary/30";
-              };
-
-              return (
-                <Card
-                  key={item.id}
-                  className="overflow-hidden neon-card hover:neon-border-medium transition-all cursor-pointer"
-                  onClick={() => navigate(`/${item.type}/${item.id}`)}
-                >
-                  <div className="flex items-center gap-4 p-4">
-                    {/* Ranking Number */}
-                    <div className="flex-shrink-0">
-                      <div className={`text-3xl font-bold w-10 text-center ${getRankColor(index)}`}>
-                        {index + 1}
-                      </div>
-                    </div>
-
-                    {/* Movie Poster */}
-                    <div className="flex-shrink-0">
-                      <img
-                        src={item.poster}
-                        alt={item.title}
-                        className="w-16 h-24 object-cover rounded-lg poster-glow"
-                      />
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-bold text-foreground mb-1 line-clamp-2">
-                            {item.title}
-                          </h3>
-                          
-                          {/* Type and Genres */}
-                          <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <Badge variant="secondary" className="text-xs neon-badge">
-                              {item.type === "tv" ? "TV Show" : "Movie"}
-                            </Badge>
-                            <span className="text-sm text-muted-foreground">
-                              {item.genres.slice(0, 3).join(", ")}
-                            </span>
-                          </div>
-
-                          {/* Year */}
-                          <p className="text-sm text-muted-foreground">
-                            {item.year}
-                          </p>
-                        </div>
-
-                        {/* Rating Circle */}
-                        {item.rating && (
-                          <div className="flex-shrink-0">
-                            <div className={`w-16 h-16 rounded-full border-3 ${getRankBorderColor(index)} flex items-center justify-center bg-background/50 shadow-lg`}>
-                              <div className="text-center">
-                                <span className={`text-2xl font-bold ${getRankColor(index)}`}>
-                                  {item.rating.toFixed(1)}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Watchlist indicator (no rating) */}
-                        {!item.rating && (
-                          <div className="flex-shrink-0">
-                            <Badge variant="outline" className="text-xs">
-                              Not watched
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
+            {filteredItems.map((item, index) => (
+              <Card
+                key={item.id}
+                className="overflow-hidden neon-card hover:neon-border-medium transition-all cursor-pointer"
+                onClick={() => navigate(`/${item.type}/${item.id}`)}
+              >
+                <div className="flex items-center gap-4 p-4">
+                  {/* Ranking Number */}
+                  <div className="flex-shrink-0">
+                    <div className="text-3xl font-bold text-foreground w-10 text-center">
+                      {index + 1}
                     </div>
                   </div>
-                </Card>
-              );
-            })}
+
+                  {/* Movie Poster */}
+                  <div className="flex-shrink-0">
+                    <img
+                      src={item.poster}
+                      alt={item.title}
+                      className="w-16 h-24 object-cover rounded-lg poster-glow"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-foreground mb-1 line-clamp-2">
+                          {item.title}
+                        </h3>
+                        
+                        {/* Type and Genres */}
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <Badge variant="secondary" className="text-xs neon-badge">
+                            {item.type === "tv" ? "TV Show" : "Movie"}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {item.genres.slice(0, 3).join(", ")}
+                          </span>
+                        </div>
+
+                        {/* Year */}
+                        <p className="text-sm text-muted-foreground">
+                          {item.year}
+                        </p>
+                      </div>
+
+                      {/* Rating Circle */}
+                      {item.rating && (
+                        <div className="flex-shrink-0">
+                          <div className="w-16 h-16 rounded-full border-2 border-primary/30 flex items-center justify-center bg-background/50">
+                            <span className="text-2xl font-bold text-primary">
+                              {item.rating.toFixed(1)}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Watchlist indicator (no rating) */}
+                      {!item.rating && (
+                        <div className="flex-shrink-0">
+                          <Badge variant="outline" className="text-xs">
+                            Not watched
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
         ) : (
           <div className="text-center py-20">

@@ -175,52 +175,76 @@ const Collection = () => {
         </div>
       </header>
 
-      {/* Grid */}
+      {/* List View */}
       <div className="container mx-auto px-4 py-6">
         {filteredItems.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 animate-fade-in">
-            {filteredItems.map((item) => (
+          <div className="space-y-4 animate-fade-in">
+            {filteredItems.map((item, index) => (
               <Card
                 key={item.id}
-                className="group cursor-pointer overflow-hidden neon-card hover:neon-border-medium transition-all"
+                className="overflow-hidden neon-card hover:neon-border-medium transition-all cursor-pointer"
                 onClick={() => navigate(`/${item.type}/${item.id}`)}
               >
-                <div className="aspect-[2/3] relative overflow-hidden">
-                  <img
-                    src={item.poster}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 poster-glow"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
-                  {/* Type Badge */}
-                  <Badge
-                    variant="secondary"
-                    className="absolute top-2 left-2 text-xs neon-badge"
-                  >
-                    {item.type === "tv" ? "TV" : "Movie"}
-                  </Badge>
-
-                  {/* Rating */}
-                  {item.rating && (
-                    <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1">
-                      <Star className="w-3 h-3 text-primary fill-primary" />
-                      <span className="text-xs font-semibold text-foreground">{item.rating}</span>
+                <div className="flex items-center gap-4 p-4">
+                  {/* Ranking Number */}
+                  <div className="flex-shrink-0">
+                    <div className="text-2xl font-bold text-foreground w-8 text-center">
+                      {index + 1}.
                     </div>
-                  )}
+                  </div>
 
-                  {/* Info on Hover */}
-                  <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <h3 className="text-sm font-bold text-foreground mb-1 line-clamp-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mb-2">{item.year}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {item.genres.slice(0, 2).map((genre) => (
-                        <Badge key={genre} variant="outline" className="text-xs">
-                          {genre}
-                        </Badge>
-                      ))}
+                  {/* Movie Poster */}
+                  <div className="flex-shrink-0">
+                    <img
+                      src={item.poster}
+                      alt={item.title}
+                      className="w-16 h-24 object-cover rounded-lg poster-glow"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-foreground mb-1 line-clamp-2">
+                          {item.title}
+                        </h3>
+                        
+                        {/* Type and Genres */}
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <Badge variant="secondary" className="text-xs neon-badge">
+                            {item.type === "tv" ? "TV Show" : "Movie"}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {item.genres.slice(0, 3).join(", ")}
+                          </span>
+                        </div>
+
+                        {/* Year */}
+                        <p className="text-sm text-muted-foreground">
+                          {item.year}
+                        </p>
+                      </div>
+
+                      {/* Rating Circle */}
+                      {item.rating && (
+                        <div className="flex-shrink-0">
+                          <div className="w-14 h-14 rounded-full border-2 border-primary/30 flex items-center justify-center bg-background/50">
+                            <span className="text-xl font-bold text-primary">
+                              {item.rating.toFixed(1)}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Watchlist indicator (no rating) */}
+                      {!item.rating && (
+                        <div className="flex-shrink-0">
+                          <Badge variant="outline" className="text-xs">
+                            Not watched
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import VibeTag from "./VibeTag";
+import { haptic } from "@/lib/haptic";
 
 interface ReviewCardProps {
   userName: string;
@@ -42,11 +43,13 @@ const ReviewCard = ({
   const reactions = ["❤️", "😂", "😮", "😢", "😍", "🔥"];
 
   const handleLike = () => {
+    haptic.light();
     setIsLiked(!isLiked);
     setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
   };
 
   const handleReaction = (reaction: string) => {
+    haptic.selection();
     setSelectedReaction(reaction);
     setShowReactions(false);
     if (!isLiked) {
@@ -56,7 +59,7 @@ const ReviewCard = ({
   };
 
   return (
-    <Card className="bg-card border-border p-6 hover:border-primary/30 transition-all duration-300">
+    <Card className="bg-card border-border p-6 hover:border-primary/30 transition-all duration-300 neon-card">
       <div className="flex items-start gap-4 mb-4">
         <Avatar className="w-12 h-12 border-2 border-primary/20">
           <AvatarImage src={userAvatar} alt={userName} />
@@ -86,7 +89,7 @@ const ReviewCard = ({
         <img
           src={moviePoster}
           alt={movieTitle}
-          className="w-20 h-30 object-cover rounded-lg border border-border"
+          className="w-20 h-30 object-cover rounded-lg border border-border poster-glow"
         />
         <div>
           <h3 className="font-bold text-lg text-foreground mb-1">{movieTitle}</h3>
@@ -147,12 +150,15 @@ const ReviewCard = ({
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-primary absolute -top-2 left-12"
-            onClick={() => setShowReactions(!showReactions)}
+            onClick={() => {
+              haptic.light();
+              setShowReactions(!showReactions);
+            }}
           >
             <Smile className="w-4 h-4" />
           </Button>
           {showReactions && (
-            <div className="absolute bottom-full left-0 mb-2 bg-card border border-border rounded-full shadow-lg p-2 flex gap-1">
+            <div className="absolute bottom-full left-0 mb-2 bg-card border border-border rounded-full shadow-lg p-2 flex gap-1 neon-border-subtle animate-scale-in">
               {reactions.map((reaction) => (
                 <button
                   key={reaction}

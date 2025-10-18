@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, X, Info, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { haptic } from "@/lib/haptic";
 
 interface Movie {
   id: number;
@@ -76,8 +77,10 @@ const Discover = () => {
     if (!currentMovie) return;
 
     if (direction === "right") {
+      haptic.success();
       toast.success(`Added "${currentMovie.title}" to watchlist! 💜`);
     } else {
+      haptic.medium();
       toast(`Skipped "${currentMovie.title}"`);
     }
 
@@ -178,17 +181,23 @@ const Discover = () => {
           {currentMovie && (
             <div
               ref={cardRef}
-              className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl cursor-grab active:cursor-grabbing transition-all"
+              className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl cursor-grab active:cursor-grabbing transition-all poster-glow"
               style={{
                 transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg)`,
                 opacity: opacity,
                 transition: isDragging ? "none" : "transform 0.3s ease-out, opacity 0.3s ease-out",
               }}
-              onMouseDown={(e) => handleDragStart(e.clientX, e.clientY)}
+              onMouseDown={(e) => {
+                haptic.light();
+                handleDragStart(e.clientX, e.clientY);
+              }}
               onMouseMove={(e) => isDragging && handleDragMove(e.clientX, e.clientY)}
               onMouseUp={handleDragEnd}
               onMouseLeave={handleDragEnd}
-              onTouchStart={(e) => handleDragStart(e.touches[0].clientX, e.touches[0].clientY)}
+              onTouchStart={(e) => {
+                haptic.light();
+                handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+              }}
               onTouchMove={(e) => handleDragMove(e.touches[0].clientX, e.touches[0].clientY)}
               onTouchEnd={handleDragEnd}
             >

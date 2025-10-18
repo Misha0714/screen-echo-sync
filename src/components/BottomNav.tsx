@@ -11,7 +11,7 @@ const BottomNav = ({ onPostClick }: BottomNavProps) => {
   const currentPath = location.pathname;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t z-50 neon-border-subtle">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-around py-3">
           <Link to="/">
@@ -21,7 +21,7 @@ const BottomNav = ({ onPostClick }: BottomNavProps) => {
                 currentPath === "/" ? "text-primary" : ""
               }`}
             >
-              <Film className={`w-5 h-5 ${currentPath === "/" ? "text-primary" : ""}`} />
+              <Film className={`w-5 h-5 ${currentPath === "/" ? "text-primary neon-glow-primary" : ""}`} />
               <span className={`text-xs ${currentPath === "/" ? "text-primary font-medium" : ""}`}>
                 Feed
               </span>
@@ -35,7 +35,7 @@ const BottomNav = ({ onPostClick }: BottomNavProps) => {
                 currentPath === "/discover" ? "text-primary" : ""
               }`}
             >
-              <TrendingUp className={`w-5 h-5 ${currentPath === "/discover" ? "text-primary" : ""}`} />
+              <TrendingUp className={`w-5 h-5 ${currentPath === "/discover" ? "text-primary neon-glow-primary" : ""}`} />
               <span className={`text-xs ${currentPath === "/discover" ? "text-primary font-medium" : ""}`}>
                 Discover
               </span>
@@ -47,16 +47,25 @@ const BottomNav = ({ onPostClick }: BottomNavProps) => {
             className="flex flex-col items-center gap-1 h-auto py-2"
             onClick={onPostClick}
           >
-            <div className="bg-primary rounded-full p-2">
+            <div className="bg-primary rounded-full p-2 neon-glow-primary">
               <Plus className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xs">Post</span>
           </Button>
           
-          <Button variant="ghost" className="flex flex-col items-center gap-1 h-auto py-2">
-            <Users className="w-5 h-5" />
-            <span className="text-xs">Friends</span>
-          </Button>
+          <Link to="/community">
+            <Button 
+              variant="ghost" 
+              className={`flex flex-col items-center gap-1 h-auto py-2 ${
+                currentPath === "/community" ? "text-primary" : ""
+              }`}
+            >
+              <Users className={`w-5 h-5 ${currentPath === "/community" ? "text-primary neon-glow-primary" : ""}`} />
+              <span className={`text-xs ${currentPath === "/community" ? "text-primary font-medium" : ""}`}>
+                Community
+              </span>
+            </Button>
+          </Link>
           
           <Link to="/profile">
             <Button 
@@ -65,7 +74,7 @@ const BottomNav = ({ onPostClick }: BottomNavProps) => {
                 currentPath === "/profile" ? "text-primary" : ""
               }`}
             >
-              <Sparkles className={`w-5 h-5 ${currentPath === "/profile" ? "text-primary" : ""}`} />
+              <Sparkles className={`w-5 h-5 ${currentPath === "/profile" ? "text-primary neon-glow-primary" : ""}`} />
               <span className={`text-xs ${currentPath === "/profile" ? "text-primary font-medium" : ""}`}>
                 Profile
               </span>

@@ -135,11 +135,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Mobile-First Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b neon-border-subtle">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Film className="w-7 h-7 text-primary" />
+              <Film className="w-7 h-7 text-primary neon-glow-primary" />
               <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                 Rewind
               </span>
@@ -304,6 +304,8 @@ const Index = () => {
         )}
       </section>
 
+      {/* Floating Add Post Button - moved to bottom nav post button */}
+      
       <AddPostDialog open={isAddPostOpen} onOpenChange={setIsAddPostOpen} />
 
       <BottomNav onPostClick={() => setIsAddPostOpen(true)} />

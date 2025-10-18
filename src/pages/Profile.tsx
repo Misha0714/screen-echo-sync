@@ -37,7 +37,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b neon-border-subtle">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold">Profile</h1>
@@ -51,7 +51,7 @@ const Profile = () => {
       <div className="container mx-auto px-4 pt-24 pb-12 max-w-4xl">
         {/* Profile Header */}
         <div className="text-center mb-8">
-          <Avatar className="w-32 h-32 mx-auto mb-4 border-4 border-primary/20">
+          <Avatar className="w-32 h-32 mx-auto mb-4 border-4 border-primary/20 neon-border-subtle">
             <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Alex Chen" />
             <AvatarFallback>AC</AvatarFallback>
           </Avatar>
@@ -129,6 +129,57 @@ const Profile = () => {
             <div className="text-2xl font-bold text-foreground">4 weeks</div>
           </Card>
         </div>
+
+        {/* Year Wrapped Section */}
+        <Card className="p-6 mb-8 bg-gradient-primary/10 border-primary/30 neon-card">
+          <div className="flex items-center gap-3 mb-6">
+            <Trophy className="w-8 h-8 text-primary neon-glow-primary" />
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                2025 Movie Year Wrapped
+              </h2>
+              <p className="text-sm text-muted-foreground">Your cinematic journey this year</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-background/50 p-4 rounded-lg border border-primary/20">
+              <div className="text-3xl font-bold text-primary mb-1">127 hours</div>
+              <div className="text-sm text-muted-foreground">Total watch time</div>
+            </div>
+            <div className="bg-background/50 p-4 rounded-lg border border-secondary/20">
+              <div className="text-3xl font-bold text-secondary mb-1">45</div>
+              <div className="text-sm text-muted-foreground">Movies watched</div>
+            </div>
+            <div className="bg-background/50 p-4 rounded-lg border border-accent/20">
+              <div className="text-3xl font-bold text-accent mb-1">8.2</div>
+              <div className="text-sm text-muted-foreground">Average rating</div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Top 3 Rated Films of 2025</h3>
+            <div className="space-y-3">
+              {[
+                { title: "Past Lives", rating: 10, genre: "Romance, Drama", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop" },
+                { title: "Everything Everywhere All at Once", rating: 9.5, genre: "Action, Sci-Fi", poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop" },
+                { title: "The Lighthouse", rating: 9.2, genre: "Horror, Drama", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop" },
+              ].map((movie, index) => (
+                <div key={movie.title} className="flex items-center gap-4 p-3 bg-background/50 rounded-lg border border-primary/10 neon-border-subtle">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary font-bold">
+                    {index + 1}
+                  </div>
+                  <img src={movie.poster} alt={movie.title} className="w-12 h-16 object-cover rounded neon-border-subtle" />
+                  <div className="flex-1">
+                    <div className="font-semibold text-foreground">{movie.title}</div>
+                    <div className="text-xs text-muted-foreground">{movie.genre}</div>
+                  </div>
+                  <div className="text-xl font-bold text-primary">{movie.rating}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
 
         {/* Recent Activity Tab */}
         <Tabs defaultValue="activity" className="w-full">

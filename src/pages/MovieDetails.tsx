@@ -6,10 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Star, Clock, Calendar, Users as UsersIcon, Heart, MessageCircle, Play, ChevronDown } from "lucide-react";
+import { ArrowLeft, Star, Clock, Calendar, Users as UsersIcon, Heart, MessageCircle, Play, ChevronDown, Bookmark, Plus } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import { haptic } from "@/lib/haptic";
 import AddPostDialog from "@/components/AddPostDialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface Review {
   id: number;
@@ -28,8 +29,19 @@ interface Review {
 const MovieDetails = () => {
   const { movieId } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isAddPostOpen, setIsAddPostOpen] = useState(false);
   const [showAllCast, setShowAllCast] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  const handleSave = () => {
+    haptic.light();
+    setIsSaved(!isSaved);
+    toast({
+      title: isSaved ? "Removed from watchlist" : "Added to watchlist",
+      description: isSaved ? "Removed from your Want to Watch list" : "Added to your Want to Watch list",
+    });
+  };
 
   // Mock movie data - in production this would come from an API
   const movie = {
@@ -154,6 +166,25 @@ const MovieDetails = () => {
                 <Button className="gap-2" onClick={() => haptic.light()}>
                   <Play className="w-4 h-4" />
                   TRAILER
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={handleSave}
+                >
+                  <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+                  {isSaved ? 'Saved' : 'Save'}
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  className="gap-2"
+                  onClick={() => {
+                    haptic.light();
+                    setIsAddPostOpen(true);
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Post
                 </Button>
                 <span className="text-muted-foreground">{movie.runtime}</span>
               </div>

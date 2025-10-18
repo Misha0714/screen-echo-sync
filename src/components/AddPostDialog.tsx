@@ -3,13 +3,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Star, UserPlus, X, Image as ImageIcon, Lock, Globe } from "lucide-react";
+import { Search, Star, UserPlus, X, Image as ImageIcon, Lock, Globe, CalendarIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { haptic } from "@/lib/haptic";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface AddPostDialogProps {
   open: boolean;
@@ -113,6 +117,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
   const [showFriendSearch, setShowFriendSearch] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(true);
+  const [watchedDate, setWatchedDate] = useState<Date>(new Date());
 
   const filteredMovies = mockMovies.filter(movie =>
     movie.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -170,6 +175,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
     setTaggedFriends([]);
     setPhotos([]);
     setIsPublic(true);
+    setWatchedDate(new Date());
   };
 
   return (
@@ -277,6 +283,35 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Watched Date */}
+              <div>
+                <label className="text-sm font-semibold mb-2 block">Date Watched</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !watchedDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {watchedDate ? format(watchedDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={watchedDate}
+                      onSelect={(date) => date && setWatchedDate(date)}
+                      disabled={(date) => date > new Date()}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* Review */}

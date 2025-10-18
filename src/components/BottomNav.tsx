@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Film, TrendingUp, Plus, Users, Sparkles } from "lucide-react";
+import { Film, TrendingUp, Plus, Users, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface BottomNavProps {
@@ -74,7 +74,7 @@ const BottomNav = ({ onPostClick }: BottomNavProps) => {
                 currentPath === "/profile" ? "text-primary" : ""
               }`}
             >
-              <Sparkles className={`w-5 h-5 ${currentPath === "/profile" ? "text-primary neon-glow-primary" : ""}`} />
+              <User className={`w-5 h-5 ${currentPath === "/profile" ? "text-primary neon-glow-primary" : ""}`} />
               <span className={`text-xs ${currentPath === "/profile" ? "text-primary font-medium" : ""}`}>
                 Profile
               </span>

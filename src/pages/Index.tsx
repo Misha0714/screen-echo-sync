@@ -3,9 +3,10 @@ import ReviewCard from "@/components/ReviewCard";
 import BottomNav from "@/components/BottomNav";
 import AddPostDialog from "@/components/AddPostDialog";
 import MovieSearch from "@/components/MovieSearch";
+import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, TrendingUp, Users, Search, Film, Calendar, Bell } from "lucide-react";
+import { Sparkles, TrendingUp, Users, Search, Film } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -149,12 +150,7 @@ const Index = () => {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="hover:bg-primary/10">
-                <Calendar className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="hover:bg-primary/10">
-                <Bell className="w-5 h-5" />
-              </Button>
+              <NotificationsDropdown />
             </div>
           </div>
           
@@ -245,9 +241,16 @@ const Index = () => {
             <TrendingUp className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold text-foreground">Trending Now</h2>
             </div>
-          <Button variant="ghost" size="sm" className="text-primary">
-            See all
-          </Button>
+          <Link to="/discover">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-primary hover:bg-primary/10 transition-all duration-200 hover:scale-105"
+              onClick={() => haptic.light()}
+            >
+              See all
+            </Button>
+          </Link>
         </div>
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex gap-4 pb-4">
@@ -270,9 +273,16 @@ const Index = () => {
             <Users className="w-5 h-5 text-accent" />
             <h2 className="text-xl font-bold text-foreground">Recommended for You</h2>
           </div>
-          <Button variant="ghost" size="sm" className="text-primary">
-            See all
-          </Button>
+          <Link to="/discover">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-primary hover:bg-primary/10 transition-all duration-200 hover:scale-105"
+              onClick={() => haptic.light()}
+            >
+              See all
+            </Button>
+          </Link>
         </div>
         <p className="text-sm text-muted-foreground mb-4">Based on what your friends watched</p>
         <ScrollArea className="w-full whitespace-nowrap">

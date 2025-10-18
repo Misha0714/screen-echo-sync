@@ -10,6 +10,8 @@ import Community from "./pages/Community";
 import MovieDetails from "./pages/MovieDetails";
 import AllReviews from "./pages/AllReviews";
 import Collection from "./pages/Collection";
+import TrendingMovies from "./pages/TrendingMovies";
+import RecommendedMovies from "./pages/RecommendedMovies";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/discover" element={<Discover />} />
+          <Route path="/trending" element={<TrendingMovies />} />
+          <Route path="/recommended" element={<RecommendedMovies />} />
           <Route path="/community" element={<Community />} />
           <Route path="/movie/:movieId" element={<MovieDetails />} />
           <Route path="/movie/:movieId/reviews" element={<AllReviews />} />

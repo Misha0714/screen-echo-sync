@@ -12,12 +12,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { haptic } from "@/lib/haptic";
 
-type FeedFilter = "forYou" | "trending" | "friends";
-
 const Index = () => {
   const [isAddPostOpen, setIsAddPostOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<FeedFilter>("forYou");
 
   const trendingMovies = [
     {
@@ -124,16 +121,6 @@ const Index = () => {
     },
   ];
 
-  const filteredReviews = recentReviews.filter((review) => {
-    if (activeFilter === "trending") {
-      const totalEngagement = review.likes + review.comments;
-      return totalEngagement > 200; // High engagement threshold
-    }
-    if (activeFilter === "friends") {
-      return review.isFollowing;
-    }
-    return true; // "forYou" shows all
-  });
 
   const vibes = ["Cozy", "Intense", "Nostalgic", "Uplifting", "Chaotic", "Existential"];
 
@@ -170,50 +157,6 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Quick Action Pills */}
-      <div className="container mx-auto px-4 py-4">
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-3">
-            <Button 
-              onClick={() => setActiveFilter("forYou")}
-              className={`rounded-full flex-shrink-0 transition-all ${
-                activeFilter === "forYou" 
-                  ? "bg-primary hover:bg-primary/90" 
-                  : "bg-transparent border border-border hover:bg-muted"
-              }`}
-              variant={activeFilter === "forYou" ? "default" : "outline"}
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              For You
-            </Button>
-            <Button 
-              onClick={() => setActiveFilter("trending")}
-              className={`rounded-full flex-shrink-0 transition-all ${
-                activeFilter === "trending" 
-                  ? "bg-primary hover:bg-primary/90" 
-                  : "bg-transparent border border-border hover:bg-muted"
-              }`}
-              variant={activeFilter === "trending" ? "default" : "outline"}
-            >
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Trending
-            </Button>
-            <Button 
-              onClick={() => setActiveFilter("friends")}
-              className={`rounded-full flex-shrink-0 transition-all ${
-                activeFilter === "friends" 
-                  ? "bg-primary hover:bg-primary/90" 
-                  : "bg-transparent border border-border hover:bg-muted"
-              }`}
-              variant={activeFilter === "friends" ? "default" : "outline"}
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Friends
-            </Button>
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
 
       {/* Vibes Filter */}
       <div className="container mx-auto px-4 pb-4">
@@ -241,7 +184,7 @@ const Index = () => {
             <TrendingUp className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold text-foreground">Trending Now</h2>
             </div>
-          <Link to="/discover">
+          <Link to="/trending">
             <Button 
               variant="ghost" 
               size="sm" 
@@ -273,7 +216,7 @@ const Index = () => {
             <Users className="w-5 h-5 text-accent" />
             <h2 className="text-xl font-bold text-foreground">Recommended for You</h2>
           </div>
-          <Link to="/discover">
+          <Link to="/recommended">
             <Button 
               variant="ghost" 
               size="sm" 
@@ -302,29 +245,14 @@ const Index = () => {
       {/* Reviews Feed */}
       <section className="container mx-auto px-4 py-6">
         <div className="flex items-center gap-2 mb-4">
-          {activeFilter === "forYou" && <Sparkles className="w-5 h-5 text-secondary" />}
-          {activeFilter === "trending" && <TrendingUp className="w-5 h-5 text-primary" />}
-          {activeFilter === "friends" && <Users className="w-5 h-5 text-accent" />}
-          <h2 className="text-xl font-bold text-foreground">
-            {activeFilter === "forYou" && "Your Feed"}
-            {activeFilter === "trending" && "Trending Posts"}
-            {activeFilter === "friends" && "Friends' Posts"}
-          </h2>
+          <Sparkles className="w-5 h-5 text-secondary" />
+          <h2 className="text-xl font-bold text-foreground">Your Feed</h2>
         </div>
-        {filteredReviews.length > 0 ? (
-          <div className="space-y-4 animate-fade-in">
-            {filteredReviews.map((review) => (
-              <ReviewCard key={`${review.userName}-${review.movieTitle}`} {...review} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 animate-fade-in">
-            <p className="text-muted-foreground">
-              {activeFilter === "trending" && "No trending posts at the moment. Check back later!"}
-              {activeFilter === "friends" && "No posts from friends yet. Follow more people to see their reviews!"}
-            </p>
-          </div>
-        )}
+        <div className="space-y-4 animate-fade-in">
+          {recentReviews.map((review) => (
+            <ReviewCard key={`${review.userName}-${review.movieTitle}`} {...review} />
+          ))}
+        </div>
       </section>
 
       {/* Floating Add Post Button - moved to bottom nav post button */}

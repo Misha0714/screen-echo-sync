@@ -322,7 +322,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                         <img
                           src={photo}
                           alt={`Upload ${index + 1}`}
-                          className="w-20 h-20 object-cover rounded-lg"
+                          className="w-16 h-16 object-cover rounded-lg"
                         />
                         <button
                           onClick={() => handleRemovePhoto(index)}
@@ -332,7 +332,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                         </button>
                       </div>
                     ))}
-                    <label className="w-20 h-20 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent transition-colors">
+                    <label className="w-16 h-16 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent transition-colors">
                       <input
                         type="file"
                         accept="image/*"
@@ -340,7 +340,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                         className="hidden"
                         onChange={handlePhotoUpload}
                       />
-                      <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
                     </label>

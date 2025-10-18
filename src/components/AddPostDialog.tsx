@@ -184,7 +184,7 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[450px] max-h-[85vh] p-0 gap-0">
+      <DialogContent className="sm:max-w-[450px] max-h-[85vh] mb-6 p-0 gap-0">
         {step === "search" ? (
           <>
             <DialogHeader className="px-4 pt-4 pb-3">
@@ -348,33 +348,33 @@ const AddPostDialog = ({ open, onOpenChange }: AddPostDialogProps) => {
                 </div>
 
                 {/* Date Watched */}
-                <div className="bg-card rounded-lg border">
-                  <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
-                    <PopoverTrigger asChild>
-                      <button className="w-full flex items-center gap-3 p-3 hover:bg-accent/50 transition-colors">
-                        <CalendarIcon className="w-4 h-4" />
-                        <span className="flex-1 text-left text-sm font-medium">
-                          {format(watchedDate, "MMM d, yyyy")}
-                        </span>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={watchedDate}
-                        onSelect={(date) => {
-                          if (date) {
-                            setWatchedDate(date);
-                            setShowDatePicker(false);
-                          }
-                        }}
-                        disabled={(date) => date > new Date()}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold">Date watched</h4>
+                    <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="gap-2">
+                          <CalendarIcon className="w-4 h-4" />
+                          <span className="text-xs">{format(watchedDate, "MMM d, yyyy")}</span>
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar
+                          mode="single"
+                          selected={watchedDate}
+                          onSelect={(date) => {
+                            if (date) {
+                              setWatchedDate(date);
+                              setShowDatePicker(false);
+                            }
+                          }}
+                          disabled={(date) => date > new Date()}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
               </div>
             </ScrollArea>

@@ -2,6 +2,7 @@ import { Heart, MessageCircle, Share2, Star, Smile } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import VibeTag from "./VibeTag";
@@ -42,6 +43,25 @@ const ReviewCard = ({
   const [showReactions, setShowReactions] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
   const [likeCount, setLikeCount] = useState(likes);
+  const [showComments, setShowComments] = useState(false);
+
+  // Mock comments data
+  const mockComments = [
+    {
+      id: 1,
+      userName: "Emma Davis",
+      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
+      comment: "Great review! I felt the same way about this one.",
+      timestamp: "2h ago"
+    },
+    {
+      id: 2,
+      userName: "Mike Chen",
+      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
+      comment: "This is now on my watchlist, thanks!",
+      timestamp: "5h ago"
+    }
+  ];
 
   // Generate username from name if not provided
   const username = userUsername || userName.toLowerCase().replace(/\s+/g, '');
@@ -183,14 +203,44 @@ const ReviewCard = ({
             </div>
           )}
         </div>
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary gap-2">
-          <MessageCircle className="w-4 h-4" />
-          {comments}
-        </Button>
+        <Collapsible open={showComments} onOpenChange={setShowComments}>
+          <CollapsibleTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`gap-2 ${showComments ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+              onClick={() => haptic.light()}
+            >
+              <MessageCircle className="w-4 h-4" />
+              {comments}
+            </Button>
+          </CollapsibleTrigger>
+        </Collapsible>
         <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary gap-2 ml-auto">
           <Share2 className="w-4 h-4" />
         </Button>
       </div>
+
+      {/* Comments Section */}
+      <Collapsible open={showComments} onOpenChange={setShowComments}>
+        <CollapsibleContent className="pt-4 border-t border-border mt-4 space-y-3 animate-fade-in">
+          {mockComments.map((comment) => (
+            <div key={comment.id} className="flex gap-3">
+              <Avatar className="w-8 h-8 border border-border">
+                <AvatarImage src={comment.userAvatar} alt={comment.userName} />
+                <AvatarFallback>{comment.userName[0]}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="bg-accent/30 rounded-lg p-3">
+                  <p className="font-semibold text-sm text-foreground">{comment.userName}</p>
+                  <p className="text-sm text-foreground/90">{comment.comment}</p>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 ml-3">{comment.timestamp}</p>
+              </div>
+            </div>
+          ))}
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 };

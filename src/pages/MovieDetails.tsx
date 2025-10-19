@@ -338,14 +338,42 @@ const MovieDetails = () => {
           <h3 className="text-lg font-semibold mb-4">RELATED FILMS</h3>
           <ScrollArea className="w-full whitespace-nowrap">
             <div className="flex gap-3 pb-4">
-              {[1, 2, 3, 4].map((i) => (
-                <img
-                  key={i}
-                  src={`https://images.unsplash.com/photo-${1485846234645 + i * 1000}-a62644f84728?w=200&h=300&fit=crop`}
-                  alt={`Related movie ${i}`}
-                  className="w-32 h-48 object-cover rounded border-2 border-primary/20 cursor-pointer hover:border-primary/50 transition-all"
+              {[
+                { 
+                  id: "before-sunrise", 
+                  title: "Before Sunrise",
+                  poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=200&h=300&fit=crop"
+                },
+                { 
+                  id: "lost-in-translation", 
+                  title: "Lost in Translation",
+                  poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop"
+                },
+                { 
+                  id: "in-the-mood-for-love", 
+                  title: "In the Mood for Love",
+                  poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop"
+                },
+                { 
+                  id: "la-la-land", 
+                  title: "La La Land",
+                  poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop"
+                }
+              ].map((film) => (
+                <Link 
+                  key={film.id} 
+                  to={`/movie/${film.id}`}
                   onClick={() => haptic.light()}
-                />
+                >
+                  <div className="flex flex-col gap-2">
+                    <img
+                      src={film.poster}
+                      alt={film.title}
+                      className="w-32 h-48 object-cover rounded border-2 border-primary/20 cursor-pointer hover:border-primary/50 transition-all poster-glow"
+                    />
+                    <p className="text-sm text-foreground font-medium w-32 truncate">{film.title}</p>
+                  </div>
+                </Link>
               ))}
             </div>
           </ScrollArea>

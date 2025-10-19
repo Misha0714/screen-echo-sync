@@ -46,7 +46,7 @@ const Profile = () => {
     memberSince: "February 2025",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
     followers: 3,
-    following: 2,
+    following: 4,
     watched: 6,
     watchlist: 2,
     favorites: 8,
@@ -216,7 +216,7 @@ const Profile = () => {
               className="text-center cursor-pointer hover:opacity-70 transition-opacity"
             >
               <div className="text-2xl font-bold text-foreground">{profileData.following}</div>
-              <div className="text-sm text-muted-foreground">following 4 people</div>
+              <div className="text-sm text-muted-foreground">Following</div>
             </button>
             <div className="text-center">
               <div className="text-2xl font-bold text-foreground">#1096</div>

@@ -216,7 +216,7 @@ const Profile = () => {
               className="text-center cursor-pointer hover:opacity-70 transition-opacity"
             >
               <div className="text-2xl font-bold text-foreground">{profileData.following}</div>
-              <div className="text-sm text-muted-foreground">Following</div>
+              <div className="text-sm text-muted-foreground">following 4 people</div>
             </button>
             <div className="text-center">
               <div className="text-2xl font-bold text-foreground">#1096</div>

@@ -1,23 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, X } from "lucide-react";
+import { Search, X, Loader2 } from "lucide-react";
 import { haptic } from "@/lib/haptic";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { tmdb, tmdbImage, hasTmdbKey, type TMDBMovie } from "@/lib/tmdb";
 
 const searchSchema = z.string().trim().max(100, "Search query too long");
-
-interface Movie {
-  id: string;
-  title: string;
-  year: string;
-  director: string;
-  poster: string;
-  type: "movie" | "tv";
-}
 
 interface MovieSearchProps {
   open: boolean;
@@ -27,21 +19,37 @@ interface MovieSearchProps {
 const MovieSearch = ({ open, onOpenChange }: MovieSearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchError, setSearchError] = useState("");
+  const [results, setResults] = useState<TMDBMovie[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
   const navigate = useNavigate();
 
-  // Mock movie data - in production this would be from an API
-  const allMovies: Movie[] = [
-    { id: "spider-man", title: "Spider-Man", year: "2002", director: "Sam Raimi", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop", type: "movie" },
-    { id: "spider-man-2", title: "Spider-Man 2", year: "2004", director: "Sam Raimi", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop", type: "movie" },
-    { id: "spider-man-3", title: "Spider-Man 3", year: "2007", director: "Sam Raimi", poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop", type: "movie" },
-    { id: "the-lighthouse", title: "The Lighthouse", year: "2019", director: "Robert Eggers", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop", type: "movie" },
-    { id: "past-lives", title: "Past Lives", year: "2023", director: "Celine Song", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop", type: "movie" },
-    { id: "amelie", title: "Amélie", year: "2001", director: "Jean-Pierre Jeunet", poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop", type: "movie" },
-    { id: "blade-runner-2049", title: "Blade Runner 2049", year: "2017", director: "Denis Villeneuve", poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=200&h=300&fit=crop", type: "movie" },
-    { id: "the-last-of-us", title: "The Last of Us", year: "2023", director: "Craig Mazin", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop", type: "tv" },
-    { id: "succession", title: "Succession", year: "2018", director: "Jesse Armstrong", poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=200&h=300&fit=crop", type: "tv" },
-    { id: "the-bear", title: "The Bear", year: "2022", director: "Christopher Storer", poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop", type: "tv" },
-  ];
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setResults([]);
+      setApiError("");
+      return;
+    }
+    if (!hasTmdbKey()) {
+      setApiError("TMDB API key not configured. Add VITE_TMDB_API_KEY to your .env file.");
+      return;
+    }
+    const handle = setTimeout(async () => {
+      setLoading(true);
+      setApiError("");
+      try {
+        const data = await tmdb.search(searchQuery);
+        // Only movies & tv (no people)
+        setResults(data.results.filter((r) => r.media_type === "movie" || r.media_type === "tv"));
+      } catch (err) {
+        setApiError(err instanceof Error ? err.message : "Search failed");
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [searchQuery]);
 
   const handleSearchChange = (value: string) => {
     try {
@@ -55,20 +63,12 @@ const MovieSearch = ({ open, onOpenChange }: MovieSearchProps) => {
     }
   };
 
-  const filteredMovies = allMovies.filter(movie =>
-    movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    movie.director.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleMovieClick = (movie: Movie) => {
+  const handleMovieClick = (movie: TMDBMovie) => {
     haptic.light();
     onOpenChange(false);
     setSearchQuery("");
-    if (movie.type === "movie") {
-      navigate(`/movie/${movie.id}`);
-    } else {
-      navigate(`/tv/${movie.id}`);
-    }
+    const type = movie.media_type === "tv" ? "tv" : "movie";
+    navigate(`/${type}/${movie.id}`);
   };
 
   const handleClearSearch = () => {
@@ -83,10 +83,10 @@ const MovieSearch = ({ open, onOpenChange }: MovieSearchProps) => {
         <DialogHeader>
           <DialogTitle>Search Movies & TV Shows</DialogTitle>
         </DialogHeader>
-        
+
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
+          <Input
             placeholder="Search for a movie or TV show..."
             className="pl-10 pr-10"
             value={searchQuery}
@@ -105,43 +105,54 @@ const MovieSearch = ({ open, onOpenChange }: MovieSearchProps) => {
           )}
         </div>
 
-        {searchError && (
-          <p className="text-sm text-destructive">{searchError}</p>
-        )}
-        
+        {searchError && <p className="text-sm text-destructive">{searchError}</p>}
+        {apiError && <p className="text-sm text-destructive">{apiError}</p>}
+
         <ScrollArea className="max-h-[60vh]">
           <div className="space-y-2 pr-4">
             {searchQuery === "" ? (
               <div className="text-center py-12 text-muted-foreground">
                 Start typing to search for movies and TV shows
               </div>
-            ) : filteredMovies.length === 0 ? (
+            ) : loading ? (
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                Searching...
+              </div>
+            ) : results.length === 0 && !apiError ? (
               <div className="text-center py-12 text-muted-foreground">
                 No results found for "{searchQuery}"
               </div>
             ) : (
-              filteredMovies.map((movie) => (
-                <button
-                  key={movie.id}
-                  onClick={() => handleMovieClick(movie)}
-                  className="w-full flex items-center gap-4 p-3 rounded-lg hover:bg-accent/50 transition-all animate-fade-in text-left"
-                >
-                  <img
-                    src={movie.poster}
-                    alt={movie.title}
-                    className="w-16 h-24 object-cover rounded border-2 border-primary/20"
-                  />
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-foreground truncate">
-                      {movie.title}
+              results.map((movie) => {
+                const title = movie.title || movie.name || "Untitled";
+                const date = movie.release_date || movie.first_air_date || "";
+                const year = date ? date.slice(0, 4) : "";
+                return (
+                  <button
+                    key={`${movie.media_type}-${movie.id}`}
+                    onClick={() => handleMovieClick(movie)}
+                    className="w-full flex items-center gap-4 p-3 rounded-lg hover:bg-accent/50 transition-all animate-fade-in text-left"
+                  >
+                    {movie.poster_path ? (
+                      <img
+                        src={tmdbImage(movie.poster_path, "w200")}
+                        alt={title}
+                        className="w-16 h-24 object-cover rounded border-2 border-primary/20"
+                      />
+                    ) : (
+                      <div className="w-16 h-24 rounded bg-muted border-2 border-primary/20" />
+                    )}
+
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-foreground truncate">{title}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {year} {movie.media_type === "tv" ? "• TV Show" : "• Movie"}
+                      </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {movie.year} • directed by {movie.director}
-                    </div>
-                  </div>
-                </button>
-              ))
+                  </button>
+                );
+              })
             )}
           </div>
         </ScrollArea>

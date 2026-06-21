@@ -156,7 +156,7 @@ const Index = () => {
                   movieYear={p.movies?.release_date?.slice(0, 4) || ""}
                   rating={reactionToRating(p.reaction, p.final_rank)}
                   review={p.comment || ""}
-                  vibes={(p.tags as any) || []}
+                  vibes={[]}
                   likes={0}
                   comments={0}
                   moviePoster={p.movies?.poster_path ? tmdbImage(p.movies.poster_path, "w300") : ""}

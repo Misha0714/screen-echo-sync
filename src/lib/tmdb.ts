@@ -78,4 +78,10 @@ export const tmdb = {
     tmdbFetch<TMDBMovieDetails>(`/tv/${id}`, {
       append_to_response: "credits,videos,similar,recommendations",
     }),
+
+  movieRecommendations: (id: string | number, page = 1) =>
+    tmdbFetch<{ results: TMDBMovie[] }>(`/movie/${id}/recommendations`, { page }),
+
+  tvRecommendations: (id: string | number, page = 1) =>
+    tmdbFetch<{ results: TMDBMovie[] }>(`/tv/${id}/recommendations`, { page }),
 };

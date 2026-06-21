@@ -93,7 +93,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_movie_fkey"
+            columns: ["tmdb_id", "media_type"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["tmdb_id", "media_type"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -156,7 +164,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "rankings_movie_fkey"
+            columns: ["tmdb_id", "media_type"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["tmdb_id", "media_type"]
+          },
+        ]
       }
       watchlist: {
         Row: {
@@ -180,7 +196,15 @@ export type Database = {
           tmdb_id?: number
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "watchlist_movie_fkey"
+            columns: ["tmdb_id", "media_type"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["tmdb_id", "media_type"]
+          },
+        ]
       }
     }
     Views: {

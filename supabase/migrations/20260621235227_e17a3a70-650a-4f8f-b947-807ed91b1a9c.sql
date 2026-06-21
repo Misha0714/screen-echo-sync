@@ -1,0 +1,3 @@
+ALTER TABLE public.watchlist ADD CONSTRAINT watchlist_movie_fkey FOREIGN KEY (tmdb_id, media_type) REFERENCES public.movies(tmdb_id, media_type) ON DELETE CASCADE;
+ALTER TABLE public.user_movie_rankings ADD CONSTRAINT rankings_movie_fkey FOREIGN KEY (tmdb_id, media_type) REFERENCES public.movies(tmdb_id, media_type) ON DELETE CASCADE;
+ALTER TABLE public.posts ADD CONSTRAINT posts_movie_fkey FOREIGN KEY (tmdb_id, media_type) REFERENCES public.movies(tmdb_id, media_type) ON DELETE CASCADE;

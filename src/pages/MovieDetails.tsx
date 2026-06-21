@@ -237,10 +237,7 @@ const MovieDetails = () => {
                 <Button
                   variant="secondary"
                   className="gap-2"
-                  onClick={() => {
-                    haptic.light();
-                    setIsAddPostOpen(true);
-                  }}
+                  onClick={handleAddPostClick}
                 >
                   <Plus className="w-4 h-4" />
                   Add Post

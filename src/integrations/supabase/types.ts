@@ -14,16 +14,207 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      movies: {
+        Row: {
+          backdrop_path: string | null
+          genres: Json | null
+          media_type: Database["public"]["Enums"]["media_type"]
+          overview: string | null
+          poster_path: string | null
+          release_date: string | null
+          runtime: number | null
+          synced_at: string
+          title: string
+          tmdb_id: number
+        }
+        Insert: {
+          backdrop_path?: string | null
+          genres?: Json | null
+          media_type: Database["public"]["Enums"]["media_type"]
+          overview?: string | null
+          poster_path?: string | null
+          release_date?: string | null
+          runtime?: number | null
+          synced_at?: string
+          title: string
+          tmdb_id: number
+        }
+        Update: {
+          backdrop_path?: string | null
+          genres?: Json | null
+          media_type?: Database["public"]["Enums"]["media_type"]
+          overview?: string | null
+          poster_path?: string | null
+          release_date?: string | null
+          runtime?: number | null
+          synced_at?: string
+          title?: string
+          tmdb_id?: number
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          comment: string | null
+          created_at: string
+          final_rank: number | null
+          id: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          reaction: Database["public"]["Enums"]["reaction_type"]
+          rewatch: boolean
+          tags: string[]
+          tmdb_id: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          final_rank?: number | null
+          id?: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          reaction: Database["public"]["Enums"]["reaction_type"]
+          rewatch?: boolean
+          tags?: string[]
+          tmdb_id: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          final_rank?: number | null
+          id?: string
+          media_type?: Database["public"]["Enums"]["media_type"]
+          reaction?: Database["public"]["Enums"]["reaction_type"]
+          rewatch?: boolean
+          tags?: string[]
+          tmdb_id?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      user_movie_rankings: {
+        Row: {
+          id: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          position: number
+          reaction: Database["public"]["Enums"]["reaction_type"]
+          score: number
+          tmdb_id: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          position: number
+          reaction: Database["public"]["Enums"]["reaction_type"]
+          score: number
+          tmdb_id: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          media_type?: Database["public"]["Enums"]["media_type"]
+          position?: number
+          reaction?: Database["public"]["Enums"]["reaction_type"]
+          score?: number
+          tmdb_id?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      watchlist: {
+        Row: {
+          added_at: string
+          id: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          tmdb_id: number
+          user_id: string
+        }
+        Insert: {
+          added_at?: string
+          id?: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          tmdb_id: number
+          user_id: string
+        }
+        Update: {
+          added_at?: string
+          id?: string
+          media_type?: Database["public"]["Enums"]["media_type"]
+          tmdb_id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      insert_ranking: {
+        Args: {
+          p_bucket_position: number
+          p_media_type: Database["public"]["Enums"]["media_type"]
+          p_reaction: Database["public"]["Enums"]["reaction_type"]
+          p_tmdb_id: number
+        }
+        Returns: {
+          id: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          position: number
+          reaction: Database["public"]["Enums"]["reaction_type"]
+          score: number
+          tmdb_id: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_movie_rankings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
-      [_ in never]: never
+      media_type: "movie" | "tv"
+      reaction_type: "love" | "fine" | "dislike"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +341,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      media_type: ["movie", "tv"],
+      reaction_type: ["love", "fine", "dislike"],
+    },
   },
 } as const

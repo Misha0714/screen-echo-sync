@@ -7,9 +7,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Star, Play, ChevronDown, Bookmark, Plus, Loader2 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import { haptic } from "@/lib/haptic";
-import AddPostDialog from "@/components/AddPostDialog";
+import AddPostFlow from "@/components/AddPostFlow";
 import { useToast } from "@/hooks/use-toast";
 import { tmdb, tmdbImage, hasTmdbKey, type TMDBMovieDetails } from "@/lib/tmdb";
+import { useAuth } from "@/hooks/useAuth";
+import { isInWatchlist, toggleWatchlist } from "@/lib/movieSync";
 
 interface Review {
   id: number;

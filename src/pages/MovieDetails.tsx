@@ -232,7 +232,7 @@ const MovieDetails = () => {
                 )}
                 <Button variant="outline" className="gap-2" onClick={handleSave}>
                   <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
-                  {isSaved ? "Saved" : "Save"}
+                  {isSaved ? "In Watchlist" : "Add to Watchlist"}
                 </Button>
                 <Button
                   variant="secondary"

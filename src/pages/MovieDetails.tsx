@@ -34,7 +34,9 @@ const MovieDetails = () => {
   const { toast } = useToast();
   const mediaType: "movie" | "tv" = location.pathname.startsWith("/tv/") ? "tv" : "movie";
   const id = params.movieId || params.showId;
+  const tmdbId = id ? Number(id) : NaN;
 
+  const { user } = useAuth();
   const [isAddPostOpen, setIsAddPostOpen] = useState(false);
   const [showAllCast, setShowAllCast] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -57,13 +59,39 @@ const MovieDetails = () => {
       .finally(() => setLoading(false));
   }, [id, mediaType]);
 
-  const handleSave = () => {
+  useEffect(() => {
+    if (!user || !Number.isFinite(tmdbId)) {
+      setIsSaved(false);
+      return;
+    }
+    isInWatchlist(tmdbId, mediaType, user.id).then(setIsSaved);
+  }, [user, tmdbId, mediaType]);
+
+  const handleSave = async () => {
     haptic.light();
-    setIsSaved(!isSaved);
-    toast({
-      title: isSaved ? "Removed from watchlist" : "Added to watchlist",
-      description: isSaved ? "Removed from your Want to Watch list" : "Added to your Want to Watch list",
-    });
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    try {
+      const nowSaved = await toggleWatchlist(tmdbId, mediaType, user.id);
+      setIsSaved(nowSaved);
+      toast({
+        title: nowSaved ? "Added to watchlist" : "Removed from watchlist",
+        description: nowSaved ? "Added to your Want to Watch list" : "Removed from your Want to Watch list",
+      });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleAddPostClick = () => {
+    haptic.light();
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setIsAddPostOpen(true);
   };
 
   // Mock reviews (TMDB has reviews endpoint but keeping app's social reviews)

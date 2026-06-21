@@ -404,7 +404,16 @@ const MovieDetails = () => {
         )}
       </div>
 
-      <AddPostDialog open={isAddPostOpen} onOpenChange={setIsAddPostOpen} />
+      {movie && Number.isFinite(tmdbId) && (
+        <AddPostFlow
+          open={isAddPostOpen}
+          onOpenChange={setIsAddPostOpen}
+          tmdbId={tmdbId}
+          mediaType={mediaType}
+          title={title}
+          posterPath={movie.poster_path}
+        />
+      )}
       <BottomNav />
     </div>
   );

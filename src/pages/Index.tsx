@@ -1,132 +1,66 @@
-import MovieCard from "@/components/MovieCard";
 import ReviewCard from "@/components/ReviewCard";
 import BottomNav from "@/components/BottomNav";
-import AddPostDialog from "@/components/AddPostDialog";
 import MovieSearch from "@/components/MovieSearch";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, TrendingUp, Users, Search, Film } from "lucide-react";
+import { Sparkles, TrendingUp, Search, Film, LogIn, LogOut, Loader2 } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { haptic } from "@/lib/haptic";
+import { supabase } from "@/integrations/supabase/client";
+import { tmdb, tmdbImage, hasTmdbKey, type TMDBMovie } from "@/lib/tmdb";
+import { useAuth } from "@/hooks/useAuth";
+
+interface FeedItem {
+  id: string;
+  user_id: string;
+  tmdb_id: number;
+  media_type: "movie" | "tv";
+  reaction: "love" | "fine" | "dislike";
+  comment: string | null;
+  tags: string[];
+  final_rank: number | null;
+  created_at: string;
+  profiles: { username: string; display_name: string | null; avatar_url: string | null } | null;
+  movies: { title: string; poster_path: string | null; release_date: string | null } | null;
+}
 
 const Index = () => {
-  const [isAddPostOpen, setIsAddPostOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [trending, setTrending] = useState<TMDBMovie[]>([]);
+  const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [loadingFeed, setLoadingFeed] = useState(true);
 
-  const trendingMovies = [
-    {
-      title: "The Lighthouse",
-      year: "2019",
-      rating: 4.5,
-      image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=600&fit=crop",
-      vibes: ["existential", "intense", "chaotic"] as const,
-    },
-    {
-      title: "Amélie",
-      year: "2001",
-      rating: 4.8,
-      image: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=400&h=600&fit=crop",
-      vibes: ["cozy", "nostalgic", "uplifting"] as const,
-    },
-    {
-      title: "Blade Runner 2049",
-      year: "2017",
-      rating: 4.6,
-      image: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&h=600&fit=crop",
-      vibes: ["existential", "intense", "nostalgic"] as const,
-    },
-    {
-      title: "Spirited Away",
-      year: "2001",
-      rating: 4.9,
-      image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=600&fit=crop",
-      vibes: ["nostalgic", "cozy", "uplifting"] as const,
-    },
-  ];
+  useEffect(() => {
+    if (hasTmdbKey()) {
+      tmdb.trending("week").then((d) => setTrending(d.results.slice(0, 10))).catch(() => {});
+    }
+  }, []);
 
-  const recentReviews = [
-    {
-      userName: "Alex Chen",
-      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-      movieTitle: "Past Lives",
-      movieYear: "2023",
-      rating: 5,
-      review: "A quietly devastating exploration of paths not taken. The film captures the ache of 'what if' with such grace. Every frame feels like a memory you can't quite hold onto.",
-      vibes: ["nostalgic", "existential"] as const,
-      likes: 234,
-      comments: 42,
-      moviePoster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop",
-      taggedFriends: [
-        { name: "Sarah Johnson", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" },
-      ],
-      photos: [
-        "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=300&fit=crop",
-      ],
-      isFollowing: true,
-    },
-    {
-      userName: "Sam Rivera",
-      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sam",
-      movieTitle: "Everything Everywhere All at Once",
-      movieYear: "2022",
-      rating: 5,
-      review: "Pure chaotic brilliance. A multiverse of emotions packed into one wild ride. Laugh-cry-existential crisis speedrun. Michelle Yeoh deserves every award.",
-      vibes: ["chaotic", "uplifting", "existential"] as const,
-      likes: 512,
-      comments: 89,
-      moviePoster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop",
-      isFollowing: true,
-    },
-    {
-      userName: "Jordan Lee",
-      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan",
-      movieTitle: "The Grand Budapest Hotel",
-      movieYear: "2014",
-      rating: 5,
-      review: "Wes Anderson at his finest. Every frame is a painting, every line is poetry. The story is heartwarming and hilarious in equal measure.",
-      vibes: ["cozy", "nostalgic", "uplifting"] as const,
-      likes: 892,
-      comments: 156,
-      moviePoster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop",
-      isFollowing: false,
-    },
-    {
-      userName: "Taylor Kim",
-      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Taylor",
-      movieTitle: "Mad Max: Fury Road",
-      movieYear: "2015",
-      rating: 5,
-      review: "Non-stop adrenaline from start to finish. A masterclass in action filmmaking. Furiosa is an absolute icon.",
-      vibes: ["intense", "chaotic", "uplifting"] as const,
-      likes: 1243,
-      comments: 203,
-      moviePoster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=200&h=300&fit=crop",
-      isFollowing: false,
-    },
-    {
-      userName: "Casey Morgan",
-      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Casey",
-      movieTitle: "Her",
-      movieYear: "2013",
-      rating: 4,
-      review: "A beautifully melancholic look at love and loneliness in the digital age. Joaquin Phoenix gives a vulnerable performance.",
-      vibes: ["existential", "nostalgic"] as const,
-      likes: 45,
-      comments: 12,
-      moviePoster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop",
-      isFollowing: true,
-    },
-  ];
+  useEffect(() => {
+    setLoadingFeed(true);
+    supabase
+      .from("posts")
+      .select("*, profiles(username, display_name, avatar_url), movies(title, poster_path, release_date)")
+      .order("created_at", { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        setFeed((data as any) || []);
+        setLoadingFeed(false);
+      });
+  }, []);
 
-
-  
+  const reactionToRating = (r: string, score: number | null) => {
+    if (score) return Math.max(1, Math.round(score / 2));
+    return r === "love" ? 5 : r === "fine" ? 3 : 1;
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Mobile-First Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b neon-border-subtle">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between mb-3">
@@ -136,15 +70,22 @@ const Index = () => {
                 Rewind
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <NotificationsDropdown />
+              {user ? (
+                <Button variant="ghost" size="icon" onClick={() => signOut()} title="Sign out">
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button variant="ghost" size="sm" onClick={() => navigate("/auth")} className="gap-1">
+                  <LogIn className="w-4 h-4" /> Sign in
+                </Button>
+              )}
             </div>
           </div>
-          
-          {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
+            <Input
               placeholder="Search movies, friends, etc."
               className="pl-10 bg-muted/50 cursor-pointer"
               onClick={() => {
@@ -157,32 +98,31 @@ const Index = () => {
         </div>
       </header>
 
-
-
-      {/* Trending Section */}
       <section className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-primary" />
-              <h2 className="text-xl font-bold text-foreground">Trending Now</h2>
-            </div>
+            <h2 className="text-xl font-bold text-foreground">Trending Now</h2>
+          </div>
           <Link to="/trending">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-primary hover:bg-primary/10 transition-all duration-200 hover:scale-105"
-              onClick={() => haptic.light()}
-            >
-              See all
-            </Button>
+            <Button variant="ghost" size="sm" className="text-primary">See all</Button>
           </Link>
         </div>
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex gap-4 pb-4">
-            {trendingMovies.map((movie) => (
-              <Link key={movie.title} to={`/movie/${movie.title.toLowerCase().replace(/\s+/g, '-')}`}>
+            {trending.map((m) => (
+              <Link key={m.id} to={`/movie/${m.id}`} onClick={() => haptic.light()}>
                 <div className="w-[160px] flex-shrink-0">
-                  <MovieCard {...movie} />
+                  {m.poster_path ? (
+                    <img
+                      src={tmdbImage(m.poster_path, "w300")}
+                      alt={m.title || m.name}
+                      className="w-full aspect-[2/3] object-cover rounded-lg border-2 border-primary/20 poster-glow"
+                    />
+                  ) : (
+                    <div className="w-full aspect-[2/3] rounded-lg bg-muted" />
+                  )}
+                  <p className="text-sm font-semibold mt-2 truncate">{m.title || m.name}</p>
                 </div>
               </Link>
             ))}
@@ -191,59 +131,44 @@ const Index = () => {
         </ScrollArea>
       </section>
 
-      {/* Recommended Section */}
-      <section className="container mx-auto px-4 py-6 bg-card/30">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-accent" />
-            <h2 className="text-xl font-bold text-foreground">Recommended for You</h2>
-          </div>
-          <Link to="/recommended">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-primary hover:bg-primary/10 transition-all duration-200 hover:scale-105"
-              onClick={() => haptic.light()}
-            >
-              See all
-            </Button>
-          </Link>
-        </div>
-        <p className="text-sm text-muted-foreground mb-4">Based on what your friends watched</p>
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-4 pb-4">
-            {trendingMovies.map((movie) => (
-              <Link key={movie.title} to={`/movie/${movie.title.toLowerCase().replace(/\s+/g, '-')}`}>
-                <div className="w-[160px] flex-shrink-0">
-                  <MovieCard {...movie} />
-                </div>
-              </Link>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </section>
-
-      {/* Reviews Feed */}
       <section className="container mx-auto px-4 py-6">
         <div className="flex items-center gap-2 mb-4">
           <Sparkles className="w-5 h-5 text-secondary" />
           <h2 className="text-xl font-bold text-foreground">Your Feed</h2>
         </div>
-        <div className="space-y-4 animate-fade-in">
-          {recentReviews.map((review) => (
-            <ReviewCard key={`${review.userName}-${review.movieTitle}`} {...review} />
-          ))}
-        </div>
+        {loadingFeed ? (
+          <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+        ) : feed.length === 0 ? (
+          <p className="text-muted-foreground text-center py-12">
+            No posts yet. {user ? "Search for a movie and add your first post!" : (
+              <Link to="/auth" className="text-primary underline">Sign in</Link>
+            )}
+          </p>
+        ) : (
+          <div className="space-y-4 animate-fade-in">
+            {feed.map((p) => (
+              <Link key={p.id} to={`/${p.media_type}/${p.tmdb_id}`} className="block">
+                <ReviewCard
+                  userName={p.profiles?.display_name || p.profiles?.username || "User"}
+                  userUsername={p.profiles?.username}
+                  userAvatar={p.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.user_id}`}
+                  movieTitle={p.movies?.title || "Untitled"}
+                  movieYear={p.movies?.release_date?.slice(0, 4) || ""}
+                  rating={reactionToRating(p.reaction, p.final_rank)}
+                  review={p.comment || ""}
+                  vibes={[]}
+                  likes={0}
+                  comments={0}
+                  moviePoster={p.movies?.poster_path ? tmdbImage(p.movies.poster_path, "w300") : ""}
+                />
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* Floating Add Post Button - moved to bottom nav post button */}
-      
-      <AddPostDialog open={isAddPostOpen} onOpenChange={setIsAddPostOpen} />
       <MovieSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} />
-
-      <BottomNav onPostClick={() => setIsAddPostOpen(true)} />
-
+      <BottomNav onPostClick={() => setIsSearchOpen(true)} />
     </div>
   );
 };

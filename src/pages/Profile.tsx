@@ -1,446 +1,236 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Share2, CheckCircle2, Bookmark, Heart, Trophy, Flame, Settings, ArrowLeft } from "lucide-react";
-import ReviewCard from "@/components/ReviewCard";
-import { Link } from "react-router-dom";
-import FollowersModal from "@/components/FollowersModal";
-import EditProfileDialog from "@/components/EditProfileDialog";
-import { haptic } from "@/lib/haptic";
-import { useToast } from "@/hooks/use-toast";
+import { Settings, ArrowLeft, LogOut, Loader2, Heart, ThumbsUp, ThumbsDown, Bookmark } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { tmdbImage } from "@/lib/tmdb";
+
+interface ProfileRow {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+}
+
+interface RankingRow {
+  id: string;
+  tmdb_id: number;
+  media_type: "movie" | "tv";
+  reaction: "love" | "fine" | "dislike";
+  score: number;
+  position: number;
+  movies: { title: string; poster_path: string | null; release_date: string | null } | null;
+}
+
+interface WatchlistRow {
+  id: string;
+  tmdb_id: number;
+  media_type: "movie" | "tv";
+  movies: { title: string; poster_path: string | null } | null;
+}
+
+const ReactionIcon = ({ r }: { r: string }) => {
+  if (r === "love") return <Heart className="w-4 h-4 text-primary fill-primary" />;
+  if (r === "fine") return <ThumbsUp className="w-4 h-4 text-secondary" />;
+  return <ThumbsDown className="w-4 h-4 text-destructive" />;
+};
 
 const Profile = () => {
   const { username } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [followersModalOpen, setFollowersModalOpen] = useState(false);
-  const [followingModalOpen, setFollowingModalOpen] = useState(false);
-  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const { user, loading: authLoading, signOut } = useAuth();
 
-  // Determine if viewing own profile or another user's
-  const isOwnProfile = !username; // If no username param, it's the current user's profile
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [isPrivate, setIsPrivate] = useState(false); // Mock - would come from API
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
+  const [rankings, setRankings] = useState<RankingRow[]>([]);
+  const [watchlist, setWatchlist] = useState<WatchlistRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock user data - in production this would come from an API based on username
-  const [profileData, setProfileData] = useState(username ? {
-    username: username,
-    displayName: "Sarah Johnson",
-    bio: "cinephile • love indie films and foreign cinema",
-    memberSince: "January 2025",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-    followers: 142,
-    following: 89,
-    watched: 234,
-    watchlist: 45,
-    favorites: 23,
-    isPrivate: false,
-  } : {
-    username: "alex_cinema",
-    displayName: "Alex Chen",
-    bio: "movie connoisseur",
-    memberSince: "February 2025",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-    followers: 3,
-    following: 4,
-    watched: 6,
-    watchlist: 2,
-    favorites: 8,
-    isPrivate: false,
-  });
+  const isOwnProfile = !username || (profile && user?.id === profile.id);
 
-  const handleFollowToggle = () => {
-    haptic.light();
-    setIsFollowing(!isFollowing);
-  };
+  useEffect(() => {
+    if (authLoading) return;
+    setLoading(true);
+    (async () => {
+      let profileRow: ProfileRow | null = null;
+      if (username) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("username", username)
+          .maybeSingle();
+        profileRow = data as any;
+      } else if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
+        profileRow = data as any;
+      }
+      setProfile(profileRow);
 
-  const handleEditProfile = (newUsername: string, newBio: string) => {
-    haptic.light();
-    setProfileData({
-      ...profileData,
-      username: newUsername,
-      bio: newBio,
-    });
-    toast({
-      title: "Profile updated",
-      description: "Your changes have been saved successfully.",
-    });
-  };
+      if (profileRow) {
+        const [r, w] = await Promise.all([
+          supabase
+            .from("user_movie_rankings")
+            .select("*, movies(title, poster_path, release_date)")
+            .eq("user_id", profileRow.id)
+            .order("position", { ascending: true }),
+          supabase
+            .from("watchlist")
+            .select("*, movies(title, poster_path)")
+            .eq("user_id", profileRow.id)
+            .order("added_at", { ascending: false }),
+        ]);
+        setRankings((r.data as any) || []);
+        setWatchlist((w.data as any) || []);
+      }
+      setLoading(false);
+    })();
+  }, [username, user, authLoading]);
 
-  const handleShareProfile = () => {
-    haptic.medium();
-    const profileUrl = `${window.location.origin}/profile/${profileData.username}`;
-    navigator.clipboard.writeText(profileUrl);
-    toast({
-      title: "Profile link copied!",
-      description: "Share your profile with others.",
-    });
-  };
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-  // Mock data for followers/following
-  const followers = [
-    { id: "1", name: "Sarah Johnson", username: "sarahjmovies", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah", isFollowing: true },
-    { id: "2", name: "Mike Chen", username: "mikecinema", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike", isFollowing: false },
-    { id: "3", name: "Emma Davis", username: "emmawatches", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma", isFollowing: true },
-  ];
+  if (!username && !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Card className="p-8 text-center max-w-sm">
+          <h2 className="text-2xl font-bold mb-2">Sign in to view your profile</h2>
+          <p className="text-muted-foreground mb-6">Track everything you watch and build your ranked list.</p>
+          <Button onClick={() => navigate("/auth")} className="w-full">Sign in</Button>
+        </Card>
+        <BottomNav />
+      </div>
+    );
+  }
 
-  const following = [
-    { id: "1", name: "Sarah Johnson", username: "sarahjmovies", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah", isFollowing: true, isMutual: true },
-    { id: "3", name: "Emma Davis", username: "emmawatches", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma", isFollowing: true, isMutual: true },
-    { id: "4", name: "Jordan Lee", username: "jordanfilms", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan", isFollowing: true, isMutual: false },
-    { id: "5", name: "Taylor Kim", username: "taylorreviews", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Taylor", isFollowing: true, isMutual: false },
-  ];
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Profile not found.</p>
+          <Button onClick={() => navigate(-1)}>Go back</Button>
+        </div>
+      </div>
+    );
+  }
 
-  const watchedMovies = [
-    { title: "Past Lives", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop" },
-    { title: "The Lighthouse", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop" },
-    { title: "Amélie", poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=200&h=300&fit=crop" },
-    { title: "Blade Runner 2049", poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=200&h=300&fit=crop" },
-  ];
-
-  const watchlistMovies = [
-    { title: "Spirited Away", poster: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=200&h=300&fit=crop" },
-    { title: "Movie 2", poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop" },
-  ];
-
-  const recentReviews = [
-    {
-      userName: "Alex Chen",
-      userAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-      movieTitle: "Past Lives",
-      movieYear: "2023",
-      rating: 5,
-      review: "A quietly devastating exploration of paths not taken. The film captures the ache of 'what if' with such grace.",
-      vibes: ["nostalgic", "existential"] as const,
-      likes: 234,
-      comments: 42,
-      moviePoster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop",
-    },
-  ];
+  const lovedCount = rankings.filter((r) => r.reaction === "love").length;
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b neon-border-subtle">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            {!isOwnProfile && (
-              <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            )}
-            <h1 className="text-xl font-bold">{isOwnProfile ? "Profile" : `@${profileData.username}`}</h1>
-            {isOwnProfile ? (
-              <Button variant="ghost" size="icon">
-                <Settings className="w-5 h-5" />
-              </Button>
-            ) : (
-              <div className="w-10" />
-            )}
-          </div>
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b neon-border-subtle">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          {!isOwnProfile ? (
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          ) : <div className="w-10" />}
+          <h1 className="text-xl font-bold">@{profile.username}</h1>
+          {isOwnProfile ? (
+            <Button variant="ghost" size="icon" onClick={() => signOut()} title="Sign out">
+              <LogOut className="w-5 h-5" />
+            </Button>
+          ) : <div className="w-10" />}
         </div>
       </header>
-      
-      <div className="container mx-auto px-4 pt-24 pb-12 max-w-4xl">
-        {/* Profile Header */}
-        <div className="text-center mb-8">
-          <Avatar className="w-32 h-32 mx-auto mb-4 border-4 border-primary/20 neon-border-subtle">
-            <AvatarImage src={profileData.avatar} alt={profileData.displayName} />
-            <AvatarFallback>{profileData.displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          
-          <h1 className="text-2xl font-bold text-foreground mb-1">@{profileData.username}</h1>
-          <p className="text-sm text-muted-foreground mb-1">Member since {profileData.memberSince}</p>
-          <p className="text-foreground/80 mb-6">{profileData.bio}</p>
-          
-          <div className="flex gap-3 justify-center mb-6">
-            {isOwnProfile ? (
-              <>
-                <Button 
-                  variant="outline" 
-                  className="border-border transition-all duration-200 hover:scale-105"
-                  onClick={() => {
-                    haptic.light();
-                    setEditProfileOpen(true);
-                  }}
-                >
-                  Edit profile
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="border-border gap-2 transition-all duration-200 hover:scale-105"
-                  onClick={handleShareProfile}
-                >
-                  <Share2 className="w-4 h-4" />
-                  Share profile
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button 
-                  variant={isFollowing ? "outline" : "default"}
-                  className="border-border"
-                  onClick={handleFollowToggle}
-                >
-                  {isFollowing ? "Unfollow" : "Follow"}
-                </Button>
-                <Button variant="outline" className="border-border gap-2">
-                  <Share2 className="w-4 h-4" />
-                  Share
-                </Button>
-              </>
-            )}
-          </div>
 
-          {/* Stats */}
-          <div className="flex justify-center gap-8 mb-8">
-            <button
-              onClick={() => {
-                haptic.light();
-                setFollowersModalOpen(true);
-              }}
-              className="text-center cursor-pointer hover:opacity-70 transition-opacity"
-            >
-              <div className="text-2xl font-bold text-foreground">{profileData.followers}</div>
-              <div className="text-sm text-muted-foreground">Followers</div>
-            </button>
-            <button
-              onClick={() => {
-                haptic.light();
-                setFollowingModalOpen(true);
-              }}
-              className="text-center cursor-pointer hover:opacity-70 transition-opacity"
-            >
-              <div className="text-2xl font-bold text-foreground">{profileData.following}</div>
-              <div className="text-sm text-muted-foreground">Following</div>
-            </button>
+      <div className="container mx-auto px-4 pt-6 pb-12 max-w-3xl">
+        <div className="text-center mb-8">
+          <Avatar className="w-28 h-28 mx-auto mb-4 border-4 border-primary/20 neon-border-subtle">
+            <AvatarImage src={profile.avatar_url || ""} />
+            <AvatarFallback>{(profile.display_name || profile.username).slice(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <h2 className="text-2xl font-bold">{profile.display_name || profile.username}</h2>
+          <p className="text-muted-foreground mt-1">{profile.bio || "Building my movie taste."}</p>
+
+          <div className="flex justify-center gap-8 mt-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-foreground">#1096</div>
-              <div className="text-sm text-muted-foreground">Ranking</div>
+              <div className="text-2xl font-bold">{rankings.length}</div>
+              <div className="text-xs text-muted-foreground">Ranked</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold">{lovedCount}</div>
+              <div className="text-xs text-muted-foreground">Loved</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold">{watchlist.length}</div>
+              <div className="text-xs text-muted-foreground">Watchlist</div>
             </div>
           </div>
         </div>
 
-        {profileData.isPrivate && !isOwnProfile ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔒</div>
-            <h2 className="text-2xl font-bold mb-2">This account is private</h2>
-            <p className="text-muted-foreground">Follow this account to see their activity</p>
-          </div>
-        ) : (
-          <>
-            {/* Collection Sections */}
-            <div className="mb-8">
-              <Link to="/collection/watched">
-                <div className="flex items-center justify-between p-4 bg-card border border-border rounded-t-lg hover:border-primary/30 transition-all cursor-pointer neon-card border-b-0">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-primary neon-glow-primary" />
-                    <span className="font-semibold text-foreground">Watched</span>
+        <Tabs defaultValue="ranked">
+          <TabsList className="w-full">
+            <TabsTrigger value="ranked" className="flex-1">Ranked</TabsTrigger>
+            <TabsTrigger value="watchlist" className="flex-1">Watchlist</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="ranked" className="mt-6 space-y-2">
+            {rankings.length === 0 && (
+              <p className="text-center text-muted-foreground py-8">No ranked movies yet.</p>
+            )}
+            {rankings.map((r, idx) => (
+              <Link
+                key={r.id}
+                to={`/${r.media_type}/${r.tmdb_id}`}
+                className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
+              >
+                <div className="w-8 text-center font-bold text-muted-foreground">{idx + 1}</div>
+                {r.movies?.poster_path ? (
+                  <img
+                    src={tmdbImage(r.movies.poster_path, "w200")}
+                    alt=""
+                    className="w-12 h-16 object-cover rounded"
+                  />
+                ) : (
+                  <div className="w-12 h-16 bg-muted rounded" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold truncate">{r.movies?.title || "Untitled"}</div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-2">
+                    <ReactionIcon r={r.reaction} />
+                    {r.movies?.release_date?.slice(0, 4)}
                   </div>
-                  <span className="text-2xl font-bold text-foreground">{profileData.watched}</span>
                 </div>
+                <div className="text-lg font-bold text-primary">{Number(r.score).toFixed(1)}</div>
               </Link>
-
-              <Link to="/collection/watchlist">
-                <div className="flex items-center justify-between p-4 bg-card border border-border hover:border-primary/30 transition-all cursor-pointer neon-card border-b-0">
-                  <div className="flex items-center gap-3">
-                    <Bookmark className="w-6 h-6 text-secondary neon-glow-secondary" />
-                    <span className="font-semibold text-foreground">Want to Watch</span>
-                  </div>
-                  <span className="text-2xl font-bold text-foreground">{profileData.watchlist}</span>
-                </div>
-              </Link>
-
-              <div className="flex items-center justify-between p-4 bg-card border border-border rounded-b-lg neon-card">
-                <div className="flex items-center gap-3">
-                  <Flame className="w-6 h-6 text-accent neon-glow-accent" />
-                  <span className="font-semibold text-foreground">Streak</span>
-                </div>
-                <span className="text-2xl font-bold text-foreground">4 weeks</span>
-              </div>
-            </div>
-
-
-        {/* Watch Year Wrapped Section */}
-        <Card className="p-6 mb-8 bg-gradient-primary/10 border-primary/30 neon-card">
-          <div className="flex items-center gap-3 mb-6">
-            <Trophy className="w-8 h-8 text-primary neon-glow-primary" />
-            <div>
-              <h2 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                2025 Watch Year Wrapped
-              </h2>
-              <p className="text-sm text-muted-foreground">Your viewing journey this year</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-background/50 p-4 rounded-lg border border-primary/20">
-              <div className="text-3xl font-bold text-primary mb-1">30 hours</div>
-              <div className="text-sm text-muted-foreground">Total watch time</div>
-            </div>
-            <div className="bg-background/50 p-4 rounded-lg border border-secondary/20">
-              <div className="text-3xl font-bold text-secondary mb-1">6</div>
-              <div className="text-sm text-muted-foreground">Titles watched</div>
-            </div>
-            <div className="bg-background/50 p-4 rounded-lg border border-accent/20">
-              <div className="text-3xl font-bold text-accent mb-1">8.2</div>
-              <div className="text-sm text-muted-foreground">Average rating</div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-foreground mb-4">Top 3 Rated Titles of 2025</h3>
-            <div className="space-y-3">
-              {[
-                { title: "The Last of Us", rating: 10, genre: "Drama, Sci-Fi", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&h=300&fit=crop", type: "TV" },
-                { title: "Past Lives", rating: 9.5, genre: "Romance, Drama", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=200&h=300&fit=crop", type: "Movie" },
-                { title: "The Bear", rating: 9.2, genre: "Drama, Comedy", poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop", type: "TV" },
-              ].map((item, index) => (
-                <div key={item.title} className="flex items-center gap-4 p-3 bg-background/50 rounded-lg border border-primary/10 neon-border-subtle">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary font-bold">
-                    {index + 1}
-                  </div>
-                  <img src={item.poster} alt={item.title} className="w-12 h-16 object-cover rounded neon-border-subtle" />
-                  <div className="flex-1">
-                    <div className="font-semibold text-foreground">{item.title}</div>
-                    <div className="text-xs text-muted-foreground">{item.type} • {item.genre}</div>
-                  </div>
-                  <div className="text-xl font-bold text-primary">{item.rating}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-            {/* Recent Activity Tab */}
-            <Tabs defaultValue="activity" className="w-full">
-              <TabsList className="w-full mb-6">
-                <TabsTrigger value="activity" className="flex-1">Recent Activity</TabsTrigger>
-                <TabsTrigger value="taste" className="flex-1">
-                  {isOwnProfile ? "Your Taste" : "Their Taste"}
-                </TabsTrigger>
-              </TabsList>
-
-          <TabsContent value="activity" className="space-y-6">
-            {recentReviews.map((review) => (
-              <ReviewCard key={review.movieTitle} {...review} />
             ))}
           </TabsContent>
 
-          <TabsContent value="taste" className="space-y-6">
-            {/* Top Genres */}
-            <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">Top Genres</h3>
-              <div className="space-y-3">
-                {[
-                  { genre: "Drama", count: 18, rating: "8.4" },
-                  { genre: "Science Fiction", count: 12, rating: "8.1" },
-                  { genre: "Romance", count: 8, rating: "7.8" },
-                  { genre: "Thriller", count: 7, rating: "8.6" },
-                ].map((item) => (
-                  <div key={item.genre} className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
-                    <div>
-                      <div className="font-semibold text-foreground">{item.genre}</div>
-                      <div className="text-sm text-muted-foreground">{item.count} movies</div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-12 h-12 rounded-full border-2 border-primary/20 flex items-center justify-center">
-                        <span className="text-sm font-semibold text-primary">{item.rating}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Favorite Actors */}
-            <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">Most Watched Actors</h3>
-              <div className="space-y-3">
-                {[
-                  { name: "Timothée Chalamet", count: 6 },
-                  { name: "Florence Pugh", count: 5 },
-                  { name: "Oscar Isaac", count: 4 },
-                ].map((actor) => (
-                  <div key={actor.name} className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
-                    <div className="font-semibold text-foreground">{actor.name}</div>
-                    <div className="text-sm text-muted-foreground">{actor.count} movies</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Movie Duration Preference */}
-            <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">Duration Preference</h3>
-              <div className="space-y-3">
-                {[
-                  { duration: "90-120 min", count: 22, percentage: "49%" },
-                  { duration: "120-150 min", count: 15, percentage: "33%" },
-                  { duration: "150+ min", count: 8, percentage: "18%" },
-                ].map((item) => (
-                  <div key={item.duration} className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
-                    <div>
-                      <div className="font-semibold text-foreground">{item.duration}</div>
-                      <div className="text-sm text-muted-foreground">{item.count} movies</div>
-                    </div>
-                    <div className="text-lg font-bold text-primary">{item.percentage}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Top Countries */}
-            <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">Movies by Country</h3>
-              <div className="space-y-3">
-                {[
-                  { country: "United States", count: 28, flag: "🇺🇸" },
-                  { country: "France", count: 8, flag: "🇫🇷" },
-                  { country: "South Korea", count: 5, flag: "🇰🇷" },
-                  { country: "Japan", count: 4, flag: "🇯🇵" },
-                ].map((item) => (
-                  <div key={item.country} className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{item.flag}</span>
-                      <div className="font-semibold text-foreground">{item.country}</div>
-                    </div>
-                    <div className="text-sm text-muted-foreground">{item.count} movies</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <TabsContent value="watchlist" className="mt-6 grid grid-cols-3 sm:grid-cols-4 gap-3">
+            {watchlist.length === 0 && (
+              <p className="col-span-full text-center text-muted-foreground py-8">Watchlist is empty.</p>
+            )}
+            {watchlist.map((w) => (
+              <Link key={w.id} to={`/${w.media_type}/${w.tmdb_id}`} className="block">
+                {w.movies?.poster_path ? (
+                  <img
+                    src={tmdbImage(w.movies.poster_path, "w300")}
+                    alt=""
+                    className="w-full aspect-[2/3] object-cover rounded-lg border-2 border-primary/20"
+                  />
+                ) : (
+                  <div className="w-full aspect-[2/3] bg-muted rounded-lg" />
+                )}
+                <p className="text-xs mt-1 truncate">{w.movies?.title}</p>
+              </Link>
+            ))}
           </TabsContent>
-            </Tabs>
-          </>
-        )}
+        </Tabs>
       </div>
-
-      <FollowersModal
-        open={followersModalOpen}
-        onOpenChange={setFollowersModalOpen}
-        type="followers"
-        users={followers}
-      />
-
-      <FollowersModal
-        open={followingModalOpen}
-        onOpenChange={setFollowingModalOpen}
-        type="following"
-        users={following}
-      />
-
-      <EditProfileDialog
-        open={editProfileOpen}
-        onOpenChange={setEditProfileOpen}
-        currentUsername={profileData.username}
-        currentBio={profileData.bio}
-        onSave={handleEditProfile}
-      />
 
       <BottomNav />
     </div>

@@ -20,6 +20,7 @@ type Card = TMDBMovie & {
 const Discover = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [mediaFilter, setMediaFilter] = useState<"movie" | "tv">("movie");
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);

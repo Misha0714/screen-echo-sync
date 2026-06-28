@@ -32,12 +32,14 @@ const Index = () => {
   const { user, signOut } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [trending, setTrending] = useState<TMDBMovie[]>([]);
+  const [trendingTv, setTrendingTv] = useState<TMDBMovie[]>([]);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [loadingFeed, setLoadingFeed] = useState(true);
 
   useEffect(() => {
     if (hasTmdbKey()) {
       tmdb.trending("week").then((d) => setTrending(d.results.slice(0, 10))).catch(() => {});
+      tmdb.trendingTv("week").then((d) => setTrendingTv(d.results.slice(0, 10))).catch(() => {});
     }
   }, []);
 

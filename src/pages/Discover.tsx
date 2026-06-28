@@ -164,6 +164,24 @@ const Discover = () => {
               readOnly
             />
           </div>
+          <div className="flex gap-2 mt-3">
+            <Button
+              size="sm"
+              variant={mediaFilter === "movie" ? "default" : "outline"}
+              className="flex-1"
+              onClick={() => { haptic.light(); setMediaFilter("movie"); }}
+            >
+              Movies
+            </Button>
+            <Button
+              size="sm"
+              variant={mediaFilter === "tv" ? "default" : "outline"}
+              className="flex-1"
+              onClick={() => { haptic.light(); setMediaFilter("tv"); }}
+            >
+              TV Shows
+            </Button>
+          </div>
         </div>
       </header>
 

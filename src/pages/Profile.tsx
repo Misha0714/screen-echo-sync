@@ -178,36 +178,55 @@ const Profile = () => {
             <TabsTrigger value="watchlist" className="flex-1">Watchlist</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="ranked" className="mt-6 space-y-2">
-            {rankings.length === 0 && (
-              <p className="text-center text-muted-foreground py-8">No ranked movies yet.</p>
+          <TabsContent value="ranked" className="mt-6">
+            {rankings.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No ranked titles yet.</p>
+            ) : (
+              <Tabs defaultValue="all">
+                <TabsList className="w-full">
+                  <TabsTrigger value="all" className="flex-1">All</TabsTrigger>
+                  <TabsTrigger value="movie" className="flex-1">Movies</TabsTrigger>
+                  <TabsTrigger value="tv" className="flex-1">TV Shows</TabsTrigger>
+                </TabsList>
+                {(["all", "movie", "tv"] as const).map((kind) => {
+                  const list = kind === "all" ? rankings : rankings.filter((r) => r.media_type === kind);
+                  return (
+                    <TabsContent key={kind} value={kind} className="mt-4 space-y-2">
+                      {list.length === 0 && (
+                        <p className="text-center text-muted-foreground py-8">Nothing here yet.</p>
+                      )}
+                      {list.map((r, idx) => (
+                        <Link
+                          key={r.id}
+                          to={`/${r.media_type}/${r.tmdb_id}`}
+                          className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
+                        >
+                          <div className="w-8 text-center font-bold text-muted-foreground">{idx + 1}</div>
+                          {r.movies?.poster_path ? (
+                            <img
+                              src={tmdbImage(r.movies.poster_path, "w200")}
+                              alt=""
+                              className="w-12 h-16 object-cover rounded"
+                            />
+                          ) : (
+                            <div className="w-12 h-16 bg-muted rounded" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold truncate">{r.movies?.title || "Untitled"}</div>
+                            <div className="text-xs text-muted-foreground flex items-center gap-2">
+                              <ReactionIcon r={r.reaction} />
+                              <span className="uppercase tracking-wide">{r.media_type === "tv" ? "TV" : "Movie"}</span>
+                              {r.movies?.release_date?.slice(0, 4)}
+                            </div>
+                          </div>
+                          <div className="text-lg font-bold text-primary">{Number(r.score).toFixed(1)}</div>
+                        </Link>
+                      ))}
+                    </TabsContent>
+                  );
+                })}
+              </Tabs>
             )}
-            {rankings.map((r, idx) => (
-              <Link
-                key={r.id}
-                to={`/${r.media_type}/${r.tmdb_id}`}
-                className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
-              >
-                <div className="w-8 text-center font-bold text-muted-foreground">{idx + 1}</div>
-                {r.movies?.poster_path ? (
-                  <img
-                    src={tmdbImage(r.movies.poster_path, "w200")}
-                    alt=""
-                    className="w-12 h-16 object-cover rounded"
-                  />
-                ) : (
-                  <div className="w-12 h-16 bg-muted rounded" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold truncate">{r.movies?.title || "Untitled"}</div>
-                  <div className="text-xs text-muted-foreground flex items-center gap-2">
-                    <ReactionIcon r={r.reaction} />
-                    {r.movies?.release_date?.slice(0, 4)}
-                  </div>
-                </div>
-                <div className="text-lg font-bold text-primary">{Number(r.score).toFixed(1)}</div>
-              </Link>
-            ))}
           </TabsContent>
 
           <TabsContent value="watchlist" className="mt-6 grid grid-cols-3 sm:grid-cols-4 gap-3">

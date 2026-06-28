@@ -60,6 +60,9 @@ export const tmdb = {
   trending: (window: "day" | "week" = "week") =>
     tmdbFetch<{ results: TMDBMovie[] }>(`/trending/movie/${window}`),
 
+  trendingTv: (window: "day" | "week" = "week") =>
+    tmdbFetch<{ results: TMDBMovie[] }>(`/trending/tv/${window}`),
+
   popularMovies: (page = 1) =>
     tmdbFetch<{ results: TMDBMovie[] }>(`/movie/popular`, { page }),
 

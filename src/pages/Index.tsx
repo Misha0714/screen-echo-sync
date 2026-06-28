@@ -104,7 +104,7 @@ const Index = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-bold text-foreground">Trending Now</h2>
+            <h2 className="text-xl font-bold text-foreground">Trending Movies</h2>
           </div>
           <Link to="/trending">
             <Button variant="ghost" size="sm" className="text-primary">See all</Button>
@@ -125,6 +125,36 @@ const Index = () => {
                     <div className="w-full aspect-[2/3] rounded-lg bg-muted" />
                   )}
                   <p className="text-sm font-semibold mt-2 truncate">{m.title || m.name}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </section>
+
+      <section className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-secondary" />
+            <h2 className="text-xl font-bold text-foreground">Trending Shows</h2>
+          </div>
+        </div>
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="flex gap-4 pb-4">
+            {trendingTv.map((m) => (
+              <Link key={m.id} to={`/tv/${m.id}`} onClick={() => haptic.light()}>
+                <div className="w-[160px] flex-shrink-0">
+                  {m.poster_path ? (
+                    <img
+                      src={tmdbImage(m.poster_path, "w300")}
+                      alt={m.name || m.title}
+                      className="w-full aspect-[2/3] object-cover rounded-lg border-2 border-secondary/20 poster-glow"
+                    />
+                  ) : (
+                    <div className="w-full aspect-[2/3] rounded-lg bg-muted" />
+                  )}
+                  <p className="text-sm font-semibold mt-2 truncate">{m.name || m.title}</p>
                 </div>
               </Link>
             ))}

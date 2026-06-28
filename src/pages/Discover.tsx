@@ -37,12 +37,13 @@ const Discover = () => {
     }
     (async () => {
       setLoading(true);
+      setCurrentIndex(0);
       try {
         const seen = new Set<string>();
         const exclude = new Set<string>();
         const out: Card[] = [];
 
-        // Build seed list: user's top-ranked + watchlist items
+        // Build seed list filtered by media type
         let seeds: { tmdb_id: number; media_type: "movie" | "tv"; title?: string }[] = [];
         if (user) {
           const [{ data: ranked }, { data: wl }] = await Promise.all([
@@ -50,12 +51,14 @@ const Discover = () => {
               .from("user_movie_rankings")
               .select("tmdb_id, media_type, score, movies(title)")
               .eq("user_id", user.id)
+              .eq("media_type", mediaFilter)
               .order("score", { ascending: false })
               .limit(5),
             supabase
               .from("watchlist")
               .select("tmdb_id, media_type, movies(title)")
               .eq("user_id", user.id)
+              .eq("media_type", mediaFilter)
               .limit(10),
           ]);
           (ranked || []).forEach((r: any) => {
@@ -64,7 +67,6 @@ const Discover = () => {
           });
           (wl || []).forEach((w: any) => {
             exclude.add(`${w.media_type}:${w.tmdb_id}`);
-            // Use top 3 watchlist items as additional seeds
             if (seeds.length < 8) seeds.push({ tmdb_id: w.tmdb_id, media_type: w.media_type, title: w.movies?.title });
           });
         }
@@ -80,21 +82,20 @@ const Discover = () => {
               const key = `${mt}:${m.id}`;
               if (seen.has(key) || exclude.has(key)) continue;
               seen.add(key);
-              out.push({ ...m, media_type: mt, reason: `Because you like ${s.title || "a movie you ranked"}` });
+              out.push({ ...m, media_type: mt, reason: `Because you like ${s.title || "something you ranked"}` });
             }
           } catch {}
         }
 
-        // Fill with trending / popular
-        const trending = await tmdb.trending("week");
+        // Fill with trending of the chosen media type
+        const trending = mediaFilter === "tv" ? await tmdb.trendingTv("week") : await tmdb.trending("week");
         for (const m of trending.results) {
-          const key = `movie:${m.id}`;
+          const key = `${mediaFilter}:${m.id}`;
           if (seen.has(key) || exclude.has(key)) continue;
           seen.add(key);
-          out.push({ ...m, media_type: "movie", reason: "Popular this week" });
+          out.push({ ...m, media_type: mediaFilter, reason: "Popular this week" });
         }
 
-        // Shuffle slight: keep recs first, then trending
         setCards(out.slice(0, 30));
       } catch (e: any) {
         toast.error(e?.message || "Failed to load recommendations");
@@ -102,7 +103,7 @@ const Discover = () => {
         setLoading(false);
       }
     })();
-  }, [user]);
+  }, [user, mediaFilter]);
 
   const currentMovie = cards[currentIndex];
 

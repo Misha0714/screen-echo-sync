@@ -27,19 +27,19 @@ export async function syncMovie(tmdb_id: number, media_type: MediaType) {
   const providersUS = (details as any)["watch/providers"]?.results?.US?.flatrate ?? [];
   const providers = providersUS.map((p: any) => ({ provider_id: p.provider_id, provider_name: p.provider_name }));
 
-  await supabase.from("movies").upsert({
-    tmdb_id,
-    media_type,
-    title: details.title || details.name || "Untitled",
-    release_date: details.release_date || details.first_air_date || null,
-    poster_path: details.poster_path,
-    backdrop_path: details.backdrop_path,
-    overview: details.overview,
-    genres: details.genres as any,
-    runtime: details.runtime ?? details.episode_run_time?.[0] ?? null,
-    cast_list: castList as any,
-    directors: directors as any,
-    providers: providers as any,
+  await supabase.rpc("upsert_movie", {
+    p_tmdb_id: tmdb_id,
+    p_media_type: media_type,
+    p_title: details.title || details.name || "Untitled",
+    p_release_date: details.release_date || details.first_air_date || null,
+    p_poster_path: details.poster_path ?? null,
+    p_backdrop_path: details.backdrop_path ?? null,
+    p_overview: details.overview ?? null,
+    p_genres: (details.genres ?? null) as any,
+    p_runtime: details.runtime ?? details.episode_run_time?.[0] ?? null,
+    p_cast_list: castList as any,
+    p_directors: directors as any,
+    p_providers: providers as any,
   });
 }
 

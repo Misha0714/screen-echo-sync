@@ -2,17 +2,25 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ThumbsUp, ThumbsDown, Loader2, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Heart, ThumbsUp, ThumbsDown, Loader2, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { syncMovie } from "@/lib/movieSync";
 import { tmdbImage } from "@/lib/tmdb";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import FollowersPicker from "@/components/FollowersPicker";
 
 type Reaction = "love" | "fine" | "dislike";
 
@@ -37,6 +45,15 @@ interface BucketMovie extends RankingRow {
   movie: { title: string; poster_path: string | null } | null;
 }
 
+const LOCATION_PRESETS = [
+  "Movie Theater",
+  "Home",
+  "On a Plane",
+  "Friend's House",
+  "Hotel",
+  "Other",
+];
+
 const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath }: Props) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -47,9 +64,13 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
   const [bucket, setBucket] = useState<BucketMovie[]>([]);
   const [low, setLow] = useState(0);
   const [high, setHigh] = useState(0);
-  const [comment, setComment] = useState("");
-  const [tagInput, setTagInput] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
+  const [tieWithId, setTieWithId] = useState<string | null>(null);
+
+  const [description, setDescription] = useState("");
+  const [locationChoice, setLocationChoice] = useState<string>("");
+  const [locationOther, setLocationOther] = useState("");
+  const [watchedWith, setWatchedWith] = useState<string[]>([]);
+  const [watchDate, setWatchDate] = useState<Date | undefined>(new Date());
   const [rewatch, setRewatch] = useState(false);
 
   useEffect(() => {
@@ -59,9 +80,12 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
       setBucket([]);
       setLow(0);
       setHigh(0);
-      setComment("");
-      setTagInput("");
-      setTags([]);
+      setTieWithId(null);
+      setDescription("");
+      setLocationChoice("");
+      setLocationOther("");
+      setWatchedWith([]);
+      setWatchDate(new Date());
       setRewatch(false);
     }
   }, [open]);
@@ -83,11 +107,9 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
       toast({ title: "Error", description: error.message, variant: "destructive" });
       return;
     }
-    // Filter out current movie if re-posting
     const filtered = (data || []).filter(
       (row) => !(row.tmdb_id === tmdbId && row.media_type === mediaType)
     );
-
     if (filtered.length === 0) {
       setBucket([]);
       setLow(0);
@@ -95,7 +117,6 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
       setStep("details");
       return;
     }
-    // Hydrate with movie details
     const ids = filtered.map((r) => r.tmdb_id);
     const { data: movies } = await supabase
       .from("movies")
@@ -104,7 +125,7 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
     const lookup = new Map(movies?.map((m) => [`${m.tmdb_id}-${m.media_type}`, m]) || []);
     const hydrated: BucketMovie[] = filtered.map((row) => ({
       ...row,
-      movie: lookup.get(`${row.tmdb_id}-${row.media_type}`) as any || null,
+      movie: (lookup.get(`${row.tmdb_id}-${row.media_type}`) as any) || null,
     }));
     setBucket(hydrated);
     setLow(0);
@@ -112,19 +133,18 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
     setStep("compare");
   };
 
-  const compareChoose = (chooseNew: boolean) => {
+  const compareChoose = (choice: "new" | "existing" | "tie") => {
     const mid = Math.floor((low + high) / 2);
+    if (choice === "tie") {
+      setTieWithId(bucket[mid].id);
+      setStep("details");
+      return;
+    }
     let nextLow = low;
     let nextHigh = high;
-    if (chooseNew) {
-      // new movie is better than bucket[mid] → search upper half (smaller indexes = higher rank)
-      nextHigh = mid - 1;
-    } else {
-      // existing is better → search lower half
-      nextLow = mid + 1;
-    }
+    if (choice === "new") nextHigh = mid - 1;
+    else nextLow = mid + 1;
     if (nextLow > nextHigh) {
-      // insertion point found
       setStep("details");
       setLow(nextLow);
       setHigh(nextHigh);
@@ -134,28 +154,21 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
     setHigh(nextHigh);
   };
 
-  const addTag = () => {
-    const t = tagInput.trim().toLowerCase();
-    if (t && !tags.includes(t) && tags.length < 10) {
-      setTags([...tags, t]);
-    }
-    setTagInput("");
-  };
-
   const save = async () => {
     if (!user || !reaction) return;
     setStep("saving");
     try {
       await syncMovie(tmdbId, mediaType);
-
-      // bucket position = `low` after binary search
       const bucketPos = bucket.length === 0 ? 0 : low;
+      const location =
+        locationChoice === "Other" ? locationOther.trim() || null : locationChoice || null;
 
-      const { data: ranking, error: rErr } = await supabase.rpc("insert_ranking", {
+      const { data: ranking, error: rErr } = await supabase.rpc("insert_ranking_v2", {
         p_tmdb_id: tmdbId,
         p_media_type: mediaType,
         p_reaction: reaction,
         p_bucket_position: bucketPos,
+        p_tie_with: tieWithId,
       });
       if (rErr) throw rErr;
 
@@ -166,14 +179,17 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
         tmdb_id: tmdbId,
         media_type: mediaType,
         reaction,
-        comment: comment || null,
-        tags,
+        comment: description || null,
+        tags: [],
         rewatch,
         final_rank: finalScore,
+        watch_date: watchDate ? format(watchDate, "yyyy-MM-dd") : null,
+        watch_location: location,
+        watched_with: watchedWith,
       });
       if (pErr) throw pErr;
 
-      toast({ title: "Posted!", description: `${title} scored ${finalScore}/10` });
+      toast({ title: "Posted!", description: `${title} scored ${Number(finalScore).toFixed(1)}/10` });
       onOpenChange(false);
     } catch (err: any) {
       toast({ title: "Save failed", description: err.message, variant: "destructive" });
@@ -185,13 +201,13 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="text-2xl">{title}</DialogTitle>
           <DialogDescription>
             {step === "reaction" && "How did you feel about it?"}
             {step === "compare" && "Which did you like more?"}
-            {step === "details" && "Add a few details (optional)"}
+            {step === "details" && "Tell us a little more"}
             {step === "saving" && "Saving..."}
           </DialogDescription>
         </DialogHeader>
@@ -223,11 +239,11 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
         )}
 
         {step === "compare" && midMovie && (
-          <div className="py-2">
-            <div className="grid grid-cols-2 gap-3">
+          <div className="py-2 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <button
-                onClick={() => compareChoose(true)}
-                className="flex flex-col items-center gap-2 p-3 border-2 border-border rounded-lg hover:border-primary transition-all"
+                onClick={() => compareChoose("new")}
+                className="flex flex-col items-center gap-2 p-4 border-2 border-border rounded-lg hover:border-primary transition-all"
               >
                 {posterPath && (
                   <img src={tmdbImage(posterPath, "w300")} alt={title} className="w-full aspect-[2/3] object-cover rounded" />
@@ -236,8 +252,8 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
                 <Badge variant="secondary" className="text-xs">New</Badge>
               </button>
               <button
-                onClick={() => compareChoose(false)}
-                className="flex flex-col items-center gap-2 p-3 border-2 border-border rounded-lg hover:border-primary transition-all"
+                onClick={() => compareChoose("existing")}
+                className="flex flex-col items-center gap-2 p-4 border-2 border-border rounded-lg hover:border-primary transition-all"
               >
                 {midMovie.movie?.poster_path && (
                   <img src={tmdbImage(midMovie.movie.poster_path, "w300")} alt="" className="w-full aspect-[2/3] object-cover rounded" />
@@ -245,63 +261,96 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
                 <div className="text-sm font-semibold text-center line-clamp-2">
                   {midMovie.movie?.title || "Untitled"}
                 </div>
-                <Badge variant="secondary" className="text-xs">{midMovie.score}/10</Badge>
+                <Badge variant="secondary" className="text-xs">{Number(midMovie.score).toFixed(1)}/10</Badge>
               </button>
             </div>
-            <p className="text-xs text-muted-foreground text-center mt-3">
-              Comparing — narrowing your ranking
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => compareChoose("tie")}
+            >
+              Too close to call
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Narrowing your ranking
             </p>
           </div>
         )}
 
         {step === "details" && (
-          <div className="space-y-4 py-2">
-            <div>
-              <Label htmlFor="comment">Your thoughts</Label>
+          <div className="space-y-5 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
               <Textarea
-                id="comment"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder="What did you think?"
                 maxLength={1000}
                 rows={4}
               />
             </div>
-            <div>
-              <Label>Tags</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addTag();
-                    }
-                  }}
-                  placeholder="e.g. cozy, intense"
-                  maxLength={20}
-                />
-                <Button type="button" onClick={addTag} variant="outline">Add</Button>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Where you watched it</Label>
+                <Select value={locationChoice} onValueChange={setLocationChoice}>
+                  <SelectTrigger><SelectValue placeholder="Pick a place" /></SelectTrigger>
+                  <SelectContent>
+                    {LOCATION_PRESETS.map((l) => (
+                      <SelectItem key={l} value={l}>{l}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {locationChoice === "Other" && (
+                  <Input
+                    placeholder="Where?"
+                    value={locationOther}
+                    onChange={(e) => setLocationOther(e.target.value)}
+                    maxLength={60}
+                  />
+                )}
               </div>
-              {tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {tags.map((t) => (
-                    <Badge key={t} variant="secondary" className="gap-1">
-                      {t}
-                      <button onClick={() => setTags(tags.filter((x) => x !== t))}>
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
+
+              <div className="space-y-2">
+                <Label>Watch date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !watchDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {watchDate ? format(watchDate, "PPP") : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={watchDate}
+                      onSelect={setWatchDate}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="rewatch">Would you rewatch?</Label>
+
+            <div className="space-y-2">
+              <Label>Who you watched it with</Label>
+              <FollowersPicker value={watchedWith} onChange={setWatchedWith} />
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <Label htmlFor="rewatch" className="cursor-pointer">Would you rewatch?</Label>
               <Switch id="rewatch" checked={rewatch} onCheckedChange={setRewatch} />
             </div>
-            <Button onClick={save} className="w-full">Save post</Button>
+
+            <Button onClick={save} className="w-full" size="lg">Save post</Button>
           </div>
         )}
 

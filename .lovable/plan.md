@@ -1,60 +1,127 @@
-# Plan: Personal movie journal with taste-based ranking
 
-This is a big chunk of work. Here's how I'll build it in one pass, grouped so you can sanity-check the shape before I start.
+## Scope
 
-## 1. Backend (Lovable Cloud)
+Four connected changes: (1) redesigned Create Post modal, (2) new ranking scale + "Too Close to Call" ties, (3) drag-and-drop Edit Rankings mode on Profile, (4) combinable filters on Profile lists. Feed sorts by watch date.
 
-Enable Lovable Cloud and create the following schema (all with RLS + GRANTs):
+---
 
-- **profiles** — `id` (uuid, FK `auth.users`), `username` (unique), `display_name`, `avatar_url`, `bio`, `created_at`. Auto-created on signup via trigger.
-- **movies** — TMDB cache: `tmdb_id` (PK or unique), `media_type` ('movie'|'tv'), `title`, `release_date`, `poster_path`, `backdrop_path`, `overview`, `genres` (jsonb), `runtime`, `synced_at`. Public read.
-- **posts** — `id`, `user_id`, `tmdb_id`, `media_type`, `reaction` ('love'|'fine'|'dislike'), `comment`, `tags` (text[]), `rewatch` (bool), `final_rank` (numeric), `created_at`, `updated_at`. Public read, owner write.
-- **watchlist** — `id`, `user_id`, `tmdb_id`, `media_type`, `added_at`. Unique (user, tmdb_id). Owner-only.
-- **user_movie_rankings** — `id`, `user_id`, `tmdb_id`, `media_type`, `reaction`, `score` (numeric, 0-10), `position` (int), `updated_at`. Unique (user, tmdb_id). This is the ordered list driving the comparison flow.
+## 1. Create Post modal (`AddPostFlow.tsx`)
 
-RLS: profiles public-read / owner-write; posts public-read / owner-write; watchlist+rankings owner-only. Explicit GRANTs to `anon`/`authenticated`/`service_role` per Lovable conventions.
+Widen dialog to `max-w-2xl`, remove all Tags UI/state. New Details step fields:
 
-## 2. Auth & onboarding
+- **Title** — read-only, shown as header (already there).
+- **Description** — existing textarea, relabeled.
+- **Where you watched it** — Select with presets (Movie Theater, Home, On a Plane, Friend's House, Other) + optional free-text when "Other".
+- **Who you watched it with** — multi-select tag input populated from the user's followers (see DB note). Type to filter, click to add chips.
+- **Watch Date** — shadcn DatePicker, defaults to today.
+- Keep "Would you rewatch?" toggle.
 
-- `/auth` page: email+password sign in/up, plus Google. After signup, profile row auto-created; redirect to `/onboarding`.
-- `/onboarding`: choose username, display name, avatar (dicebear seed picker), short bio. Saves to `profiles`.
-- `useAuth` hook with `onAuthStateChange` listener + `getUser()` validation. Protect post creation, watchlist, ranking, profile-edit routes. Public browsing of feed/movie pages stays open.
+Cleaner spacing: `space-y-5`, section labels, grid layout for date + location on desktop.
 
-## 3. TMDB integration
+---
 
-Reuse existing `src/lib/tmdb.ts`. Add a small helper `syncMovieToDb(tmdb_id, media_type)` that upserts into `movies` after fetching from TMDB — called whenever a user adds a post, watchlist item, or ranking. Trending/search remain client-side TMDB calls (no caching needed).
+## 2. Ranking system
 
-## 4. Add Post flow (Beli-style comparison)
+### Comparison flow
+Add a third button on the compare step: **Love it / Fine / Dislike** already exist for reaction; the compare step gets **"[New] wins" / "[Existing] wins" / "Too close to call"**. "Too close" collapses the binary search and pins the new movie to the same score as that neighbor.
 
-Replace current `AddPostDialog` with a multi-step modal opened from `MovieDetails` "Add Post":
+### Score scale
+Scores become deterministic by rank: `score = max(0, 10.0 - (rank_index * 0.1))`. Ties share the same rank index. Recomputed after every insert/reorder in a single RPC.
 
-1. **Reaction**: "Did you like it?" → I love it / It was fine / I disliked it. Maps to score bucket: love=[7,10], fine=[4,6.9], dislike=[0,3.9].
-2. **Comparison (binary search)**: Pull user's existing rankings filtered to the same bucket, ordered by `position`. Repeatedly ask "Which did you like more: [new] or [existing midpoint]?" Narrow the range until insertion index is found. ~log2(n) questions. Skippable if bucket empty (first movie just lands in the middle of its bucket).
-3. **Details**: optional comment, tags (chips), rewatch toggle.
-4. **Save**: compute `final_rank` score by interpolating between neighbors' scores in the bucket; insert into `posts` and upsert into `user_movie_rankings` with new `position`; renumber affected positions in a single RPC (`insert_ranking`) to keep ordering consistent.
+### Feed order
+`posts` list on home + profile activity sorts by `watch_date` desc (fallback `created_at`).
 
-The RPC `insert_ranking(p_tmdb_id, p_media_type, p_reaction, p_position)` runs as `security definer`, shifts later positions in the user's list, inserts the new row, and recomputes `score` for the inserted row based on bucket bounds + neighbors.
+---
 
-## 5. Profile, feed, watchlist UI
+## 3. Edit Rankings (Profile)
 
-- **Profile page**: replace mock stats with real counts (posts, watchlist, rankings). New "Ranked" tab renders `user_movie_rankings` ordered by `position` with poster, title, score badge. Watchlist tab pulls from `watchlist`. Activity tab pulls from `posts` joined with `movies`.
-- **Home feed (`Index`)**: query latest `posts` (all users) with profile + movie joined, render via `ReviewCard`. Keep current visual style.
-- **Movie detail page**: "Add Post" opens the new flow; "Save" toggles watchlist row. Both require auth — redirect to `/auth` if signed-out.
+- Toggle button "Edit Rankings" on the Ranked tab.
+- Use `@dnd-kit/core` + `@dnd-kit/sortable` for drag-and-drop of the ranked list.
+- On drop: call new RPC `reorder_rankings(p_ordered_ids uuid[], p_ties jsonb)` that rewrites `position` and recomputes `score` using the 10.0 − 0.1·rank formula, respecting tie groups.
+- Long-press to mark two adjacent items as tied (or an inline "tie with above" button in edit mode).
+- Optimistic UI with framer-motion layout animations.
 
-## 6. Technical notes
+---
 
-- Comparison uses binary search against rankings already in the chosen reaction bucket; O(log n) prompts.
-- Score interpolation: `score = (low_neighbor.score + high_neighbor.score) / 2`, clamped to bucket bounds; if first in bucket, midpoint of bucket.
-- Positions stored as dense integers; the insert RPC shifts `position = position + 1` for rows at/after the insertion index inside the user's full ordered list to keep one global ordering per user across buckets.
-- Posts and rankings are separate: a user can post multiple times about the same movie (re-watch entries), but only one ranking row per (user, tmdb_id) — re-posting updates the existing ranking.
-- All TMDB metadata stays fetched live; `movies` table is just a denormalized cache so feed/profile queries don't need TMDB roundtrips.
-- Existing mock data in Discover, Community, Collection pages stays untouched in this pass — call them out as follow-ups.
+## 4. Profile filters
 
-## 7. Out of scope this pass
+Filter bar above the ranked/watchlist list with combinable chips:
 
-- Real follower/following graph (UI stays mock).
-- Comments on posts (UI stays mock).
-- Notifications.
-- Email templates / password reset page (can add next).
+- Media type (Movie / TV) — already exists as tabs; keep.
+- Genre — from `movies.genres` jsonb.
+- Release Year — range or single year from `movies.release_date`.
+- Actors / Directors — needs new cache columns (see DB).
+- Streaming Service — from TMDB `/watch/providers`, cached.
+- Watched With — from `posts.watched_with`.
+- Watch Location — from `posts.watch_location`.
+- Favorites — reactions = "love".
 
-Shall I proceed?
+Filters are AND-combined. State kept in a `useFilters` hook; UI is a collapsible panel with active-chip summary.
+
+---
+
+## Database changes (one migration)
+
+```sql
+-- posts: new fields
+ALTER TABLE public.posts
+  ADD COLUMN watch_date date,
+  ADD COLUMN watch_location text,
+  ADD COLUMN watched_with uuid[] not null default '{}';
+-- drop tags column usage (keep column for back-compat, unused in UI)
+
+-- rankings: ties
+ALTER TABLE public.user_movie_rankings
+  ADD COLUMN tie_group integer; -- same integer = tied
+
+-- movies cache: enrich for filters
+ALTER TABLE public.movies
+  ADD COLUMN cast jsonb,        -- [{id,name,character}]
+  ADD COLUMN directors jsonb,   -- [{id,name}]
+  ADD COLUMN providers jsonb;   -- [{provider_id,provider_name}]
+
+-- follows (needed for "watched with" picker) — create only if missing
+CREATE TABLE IF NOT EXISTS public.follows (
+  follower_id uuid not null references auth.users(id) on delete cascade,
+  followee_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (follower_id, followee_id)
+);
+GRANT SELECT, INSERT, DELETE ON public.follows TO authenticated;
+GRANT ALL ON public.follows TO service_role;
+ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
+CREATE POLICY follows_read_all ON public.follows FOR SELECT USING (true);
+CREATE POLICY follows_write_own ON public.follows FOR INSERT WITH CHECK (auth.uid() = follower_id);
+CREATE POLICY follows_delete_own ON public.follows FOR DELETE USING (auth.uid() = follower_id);
+
+-- new RPCs:
+-- insert_ranking_v2(tmdb_id, media_type, reaction, bucket_position, tie_with_id null)
+-- reorder_rankings(ordered_ids uuid[], tie_groups jsonb)
+-- both recompute score = greatest(0, 10.0 - (rank_index * 0.1))
+```
+
+`movieSync.ts` extended to also upsert cast/directors/providers from TMDB `/credits` and `/watch/providers`.
+
+---
+
+## File touch list
+
+- `src/components/AddPostFlow.tsx` — modal redesign, followers picker, date, location, tie option in compare step.
+- `src/components/FollowersPicker.tsx` (new) — multi-select of followers.
+- `src/components/RankingEditor.tsx` (new) — dnd-kit sortable list + tie toggle.
+- `src/components/ProfileFilters.tsx` (new) — filter panel + chip bar.
+- `src/hooks/useProfileFilters.ts` (new).
+- `src/pages/Profile.tsx` — mount editor + filters, apply filter predicate, sort activity by watch_date.
+- `src/pages/Index.tsx` — feed sort by watch_date.
+- `src/lib/movieSync.ts` — enrich with cast/directors/providers.
+- `src/lib/tmdb.ts` — add credits + watch providers helpers.
+- DB migration as above.
+
+---
+
+## Non-goals for this pass
+
+- No changes to auth, discover swipe deck, notifications, or movie details page beyond what's implied.
+- Legacy `tags` column stays in DB (unused in UI) to avoid breaking existing rows.
+
+Confirm and I'll ship the migration first, then the code.

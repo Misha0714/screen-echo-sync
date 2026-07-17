@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, LogOut, Loader2, Heart, ThumbsUp, ThumbsDown } from "lucide-react";
+import { ArrowLeft, LogOut, Loader2, Heart, ThumbsUp, ThumbsDown, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { tmdbImage } from "@/lib/tmdb";
+import RankingEditor, { type EditableRanking } from "@/components/RankingEditor";
+import ProfileFilters from "@/components/ProfileFilters";
+import { useProfileFilters, type RankingForFilter } from "@/hooks/useProfileFilters";
 
 interface ProfileRow {
   id: string;
@@ -18,14 +21,14 @@ interface ProfileRow {
   bio: string | null;
 }
 
-interface RankingRow {
+interface RankingRow extends RankingForFilter {
   id: string;
   tmdb_id: number;
   media_type: "movie" | "tv";
   reaction: "love" | "fine" | "dislike";
   score: number;
   position: number;
-  movies: { title: string; poster_path: string | null; release_date: string | null } | null;
+  tie_group: number | null;
 }
 
 interface WatchlistRow {
@@ -49,7 +52,11 @@ const Profile = () => {
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [rankings, setRankings] = useState<RankingRow[]>([]);
   const [watchlist, setWatchlist] = useState<WatchlistRow[]>([]);
+  const [postMeta, setPostMeta] = useState<
+    Record<string, { watch_date: string | null; watch_location: string | null; watched_with: string[] }>
+  >({});
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
 
   const isOwnProfile = !username || (profile && user?.id === profile.id);
 
@@ -59,27 +66,19 @@ const Profile = () => {
     (async () => {
       let profileRow: ProfileRow | null = null;
       if (username) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("username", username)
-          .maybeSingle();
+        const { data } = await supabase.from("profiles").select("*").eq("username", username).maybeSingle();
         profileRow = data as any;
       } else if (user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .maybeSingle();
+        const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
         profileRow = data as any;
       }
       setProfile(profileRow);
 
       if (profileRow) {
-        const [r, w] = await Promise.all([
+        const [r, w, posts] = await Promise.all([
           supabase
             .from("user_movie_rankings")
-            .select("*, movies(title, poster_path, release_date)")
+            .select("*, movies(title, poster_path, release_date, genres, cast_list, directors, providers)")
             .eq("user_id", profileRow.id)
             .order("position", { ascending: true }),
           supabase
@@ -87,13 +86,49 @@ const Profile = () => {
             .select("*, movies(title, poster_path)")
             .eq("user_id", profileRow.id)
             .order("added_at", { ascending: false }),
+          supabase
+            .from("posts")
+            .select("tmdb_id, media_type, watch_date, watch_location, watched_with")
+            .eq("user_id", profileRow.id),
         ]);
-        setRankings((r.data as any) || []);
+
+        // Merge latest post meta (watch_date/location/with) into rankings by movie key.
+        const metaMap: Record<string, any> = {};
+        ((posts.data as any) || []).forEach((p: any) => {
+          const key = `${p.tmdb_id}-${p.media_type}`;
+          metaMap[key] = {
+            watch_date: p.watch_date,
+            watch_location: p.watch_location,
+            watched_with: p.watched_with || [],
+          };
+        });
+        setPostMeta(metaMap);
+
+        const enriched = ((r.data as any) || []).map((row: any) => ({
+          ...row,
+          watch_location: metaMap[`${row.tmdb_id}-${row.media_type}`]?.watch_location ?? null,
+          watched_with: metaMap[`${row.tmdb_id}-${row.media_type}`]?.watched_with ?? [],
+        }));
+
+        setRankings(enriched);
         setWatchlist((w.data as any) || []);
       }
       setLoading(false);
     })();
   }, [username, user, authLoading]);
+
+  const ctrl = useProfileFilters<RankingRow>(rankings);
+  const filtered = ctrl.filtered;
+
+  // Sort recent activity by watch_date desc (fallback to nothing)
+  const recentActivity = useMemo(() => {
+    return [...rankings]
+      .map((r) => ({ r, wd: postMeta[`${r.tmdb_id}-${r.media_type}`]?.watch_date }))
+      .filter((x) => x.wd)
+      .sort((a, b) => (b.wd! > a.wd! ? 1 : -1))
+      .slice(0, 8)
+      .map((x) => x.r);
+  }, [rankings, postMeta]);
 
   if (authLoading || loading) {
     return (
@@ -175,57 +210,99 @@ const Profile = () => {
         <Tabs defaultValue="ranked">
           <TabsList className="w-full">
             <TabsTrigger value="ranked" className="flex-1">Ranked</TabsTrigger>
+            <TabsTrigger value="activity" className="flex-1">Recent</TabsTrigger>
             <TabsTrigger value="watchlist" className="flex-1">Watchlist</TabsTrigger>
           </TabsList>
 
           <TabsContent value="ranked" className="mt-6">
-            {rankings.length === 0 ? (
+            {editing && isOwnProfile ? (
+              <RankingEditor
+                rankings={rankings as any as EditableRanking[]}
+                onDone={(updated) => {
+                  setRankings((cur) =>
+                    cur
+                      .map((r) => {
+                        const u = updated.find((x) => x.id === r.id);
+                        return u ? { ...r, score: u.score, position: u.position, tie_group: u.tie_group } : r;
+                      })
+                      .sort((a, b) => a.position - b.position)
+                  );
+                  setEditing(false);
+                }}
+                onCancel={() => setEditing(false)}
+              />
+            ) : rankings.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">No ranked titles yet.</p>
             ) : (
-              <Tabs defaultValue="all">
-                <TabsList className="w-full">
-                  <TabsTrigger value="all" className="flex-1">All</TabsTrigger>
-                  <TabsTrigger value="movie" className="flex-1">Movies</TabsTrigger>
-                  <TabsTrigger value="tv" className="flex-1">TV Shows</TabsTrigger>
-                </TabsList>
-                {(["all", "movie", "tv"] as const).map((kind) => {
-                  const list = kind === "all" ? rankings : rankings.filter((r) => r.media_type === kind);
-                  return (
-                    <TabsContent key={kind} value={kind} className="mt-4 space-y-2">
-                      {list.length === 0 && (
-                        <p className="text-center text-muted-foreground py-8">Nothing here yet.</p>
-                      )}
-                      {list.map((r, idx) => (
-                        <Link
-                          key={r.id}
-                          to={`/${r.media_type}/${r.tmdb_id}`}
-                          className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
-                        >
-                          <div className="w-8 text-center font-bold text-muted-foreground">{idx + 1}</div>
-                          {r.movies?.poster_path ? (
-                            <img
-                              src={tmdbImage(r.movies.poster_path, "w200")}
-                              alt=""
-                              className="w-12 h-16 object-cover rounded"
-                            />
-                          ) : (
-                            <div className="w-12 h-16 bg-muted rounded" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold truncate">{r.movies?.title || "Untitled"}</div>
-                            <div className="text-xs text-muted-foreground flex items-center gap-2">
-                              <ReactionIcon r={r.reaction} />
-                              <span className="uppercase tracking-wide">{r.media_type === "tv" ? "TV" : "Movie"}</span>
-                              {r.movies?.release_date?.slice(0, 4)}
-                            </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <ProfileFilters ctrl={ctrl} />
+                  {isOwnProfile && (
+                    <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="gap-2">
+                      <Pencil className="w-4 h-4" /> Edit rankings
+                    </Button>
+                  )}
+                </div>
+                {filtered.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No matches. Try clearing filters.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {filtered.map((r, idx) => (
+                      <Link
+                        key={r.id}
+                        to={`/${r.media_type}/${r.tmdb_id}`}
+                        className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
+                      >
+                        <div className="w-8 text-center font-bold text-muted-foreground">{idx + 1}</div>
+                        {r.movies?.poster_path ? (
+                          <img src={tmdbImage(r.movies.poster_path, "w200")} alt="" className="w-12 h-16 object-cover rounded" />
+                        ) : (
+                          <div className="w-12 h-16 bg-muted rounded" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold truncate">{r.movies?.title || "Untitled"}</div>
+                          <div className="text-xs text-muted-foreground flex items-center gap-2">
+                            <ReactionIcon r={r.reaction} />
+                            <span className="uppercase tracking-wide">{r.media_type === "tv" ? "TV" : "Movie"}</span>
+                            {r.movies?.release_date?.slice(0, 4)}
                           </div>
-                          <div className="text-lg font-bold text-primary">{Number(r.score).toFixed(1)}</div>
-                        </Link>
-                      ))}
-                    </TabsContent>
-                  );
-                })}
-              </Tabs>
+                        </div>
+                        <div className="text-lg font-bold text-primary tabular-nums">
+                          {Number(r.score).toFixed(1)}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="activity" className="mt-6 space-y-2">
+            {recentActivity.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No dated posts yet.</p>
+            ) : (
+              recentActivity.map((r) => {
+                const meta = postMeta[`${r.tmdb_id}-${r.media_type}`];
+                return (
+                  <Link
+                    key={r.id}
+                    to={`/${r.media_type}/${r.tmdb_id}`}
+                    className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
+                  >
+                    {r.movies?.poster_path ? (
+                      <img src={tmdbImage(r.movies.poster_path, "w200")} alt="" className="w-12 h-16 object-cover rounded" />
+                    ) : <div className="w-12 h-16 bg-muted rounded" />}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold truncate">{r.movies?.title || "Untitled"}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Watched {meta?.watch_date}{meta?.watch_location ? ` · ${meta.watch_location}` : ""}
+                      </div>
+                    </div>
+                    <div className="text-lg font-bold text-primary tabular-nums">{Number(r.score).toFixed(1)}</div>
+                  </Link>
+                );
+              })
             )}
           </TabsContent>
 
@@ -236,11 +313,7 @@ const Profile = () => {
             {watchlist.map((w) => (
               <Link key={w.id} to={`/${w.media_type}/${w.tmdb_id}`} className="block">
                 {w.movies?.poster_path ? (
-                  <img
-                    src={tmdbImage(w.movies.poster_path, "w300")}
-                    alt=""
-                    className="w-full aspect-[2/3] object-cover rounded-lg border-2 border-primary/20"
-                  />
+                  <img src={tmdbImage(w.movies.poster_path, "w300")} alt="" className="w-full aspect-[2/3] object-cover rounded-lg border-2 border-primary/20" />
                 ) : (
                   <div className="w-full aspect-[2/3] bg-muted rounded-lg" />
                 )}

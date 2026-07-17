@@ -14,13 +14,34 @@ export type Database = {
   }
   public: {
     Tables: {
+      follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+        }
+        Relationships: []
+      }
       movies: {
         Row: {
           backdrop_path: string | null
+          cast_list: Json | null
+          directors: Json | null
           genres: Json | null
           media_type: Database["public"]["Enums"]["media_type"]
           overview: string | null
           poster_path: string | null
+          providers: Json | null
           release_date: string | null
           runtime: number | null
           synced_at: string
@@ -29,10 +50,13 @@ export type Database = {
         }
         Insert: {
           backdrop_path?: string | null
+          cast_list?: Json | null
+          directors?: Json | null
           genres?: Json | null
           media_type: Database["public"]["Enums"]["media_type"]
           overview?: string | null
           poster_path?: string | null
+          providers?: Json | null
           release_date?: string | null
           runtime?: number | null
           synced_at?: string
@@ -41,10 +65,13 @@ export type Database = {
         }
         Update: {
           backdrop_path?: string | null
+          cast_list?: Json | null
+          directors?: Json | null
           genres?: Json | null
           media_type?: Database["public"]["Enums"]["media_type"]
           overview?: string | null
           poster_path?: string | null
+          providers?: Json | null
           release_date?: string | null
           runtime?: number | null
           synced_at?: string
@@ -66,6 +93,9 @@ export type Database = {
           tmdb_id: number
           updated_at: string
           user_id: string
+          watch_date: string | null
+          watch_location: string | null
+          watched_with: string[]
         }
         Insert: {
           comment?: string | null
@@ -79,6 +109,9 @@ export type Database = {
           tmdb_id: number
           updated_at?: string
           user_id: string
+          watch_date?: string | null
+          watch_location?: string | null
+          watched_with?: string[]
         }
         Update: {
           comment?: string | null
@@ -92,6 +125,9 @@ export type Database = {
           tmdb_id?: number
           updated_at?: string
           user_id?: string
+          watch_date?: string | null
+          watch_location?: string | null
+          watched_with?: string[]
         }
         Relationships: [
           {
@@ -140,6 +176,7 @@ export type Database = {
           position: number
           reaction: Database["public"]["Enums"]["reaction_type"]
           score: number
+          tie_group: number | null
           tmdb_id: number
           updated_at: string
           user_id: string
@@ -150,6 +187,7 @@ export type Database = {
           position: number
           reaction: Database["public"]["Enums"]["reaction_type"]
           score: number
+          tie_group?: number | null
           tmdb_id: number
           updated_at?: string
           user_id: string
@@ -160,6 +198,7 @@ export type Database = {
           position?: number
           reaction?: Database["public"]["Enums"]["reaction_type"]
           score?: number
+          tie_group?: number | null
           tmdb_id?: number
           updated_at?: string
           user_id?: string
@@ -224,6 +263,7 @@ export type Database = {
           position: number
           reaction: Database["public"]["Enums"]["reaction_type"]
           score: number
+          tie_group: number | null
           tmdb_id: number
           updated_at: string
           user_id: string
@@ -234,6 +274,37 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      insert_ranking_v2: {
+        Args: {
+          p_bucket_position: number
+          p_media_type: Database["public"]["Enums"]["media_type"]
+          p_reaction: Database["public"]["Enums"]["reaction_type"]
+          p_tie_with?: string
+          p_tmdb_id: number
+        }
+        Returns: {
+          id: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          position: number
+          reaction: Database["public"]["Enums"]["reaction_type"]
+          score: number
+          tie_group: number | null
+          tmdb_id: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_movie_rankings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      recompute_user_scores: { Args: { p_user_id: string }; Returns: undefined }
+      reorder_rankings: {
+        Args: { p_ordered_ids: string[]; p_ties?: Json }
+        Returns: undefined
       }
     }
     Enums: {

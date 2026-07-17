@@ -48,6 +48,7 @@ const Index = () => {
     supabase
       .from("posts")
       .select("*, profiles(username, display_name, avatar_url), movies(title, poster_path, release_date)")
+      .order("watch_date", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(20)
       .then(({ data }) => {

@@ -306,6 +306,23 @@ export type Database = {
         Args: { p_ordered_ids: string[]; p_ties?: Json }
         Returns: undefined
       }
+      upsert_movie: {
+        Args: {
+          p_backdrop_path: string
+          p_cast_list: Json
+          p_directors: Json
+          p_genres: Json
+          p_media_type: Database["public"]["Enums"]["media_type"]
+          p_overview: string
+          p_poster_path: string
+          p_providers: Json
+          p_release_date: string
+          p_runtime: number
+          p_title: string
+          p_tmdb_id: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       media_type: "movie" | "tv"

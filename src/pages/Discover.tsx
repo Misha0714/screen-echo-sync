@@ -149,6 +149,7 @@ const Discover = () => {
       }
     } else {
       haptic.medium();
+      addDismissed(`${currentMovie.media_type}:${currentMovie.id}`);
     }
     setTimeout(() => {
       setCurrentIndex((p) => p + 1);

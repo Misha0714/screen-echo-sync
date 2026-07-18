@@ -266,7 +266,7 @@ const Profile = () => {
                   <Link
                     key={p.id}
                     to={`/${p.media_type}/${p.tmdb_id}`}
-                    className="block p-4 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
+                    className="relative block p-4 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
                   >
                     <p className="text-xs text-muted-foreground mb-3">
                       You watched <span className="font-semibold text-foreground">{p.movies?.title || "Untitled"}</span>
@@ -314,7 +314,36 @@ const Profile = () => {
                         </div>
                       </div>
                     </div>
+                    {isOwnProfile && (
+                      <div className="absolute bottom-2 right-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                setDeleteReview(p);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete review
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    )}
                   </Link>
+
                 );
               })
             )}

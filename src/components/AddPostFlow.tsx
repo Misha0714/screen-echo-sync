@@ -60,12 +60,15 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState<"reaction" | "compare" | "details" | "saving">("reaction");
+  const [step, setStep] = useState<"reaction" | "compare" | "manual" | "details" | "saving">("reaction");
   const [reaction, setReaction] = useState<Reaction | null>(null);
   const [bucket, setBucket] = useState<BucketMovie[]>([]);
+  const [allRankings, setAllRankings] = useState<BucketMovie[]>([]);
   const [low, setLow] = useState(0);
   const [high, setHigh] = useState(0);
   const [tieWithId, setTieWithId] = useState<string | null>(null);
+  const [manualScore, setManualScore] = useState<number>(7);
+  const [manualBucketPos, setManualBucketPos] = useState<number | null>(null);
 
   const [description, setDescription] = useState("");
   const [locationChoice, setLocationChoice] = useState<string>("");

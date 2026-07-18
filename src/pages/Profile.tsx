@@ -74,6 +74,7 @@ const Profile = () => {
   const [watchlist, setWatchlist] = useState<WatchlistRow[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [deleteReview, setDeleteReview] = useState<ReviewRow | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
   const { toast } = useToast();
 
   const handleDeleteReview = async () => {

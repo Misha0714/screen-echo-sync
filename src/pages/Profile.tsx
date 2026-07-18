@@ -38,6 +38,16 @@ interface WatchlistRow {
   movies: { title: string; poster_path: string | null } | null;
 }
 
+interface ReviewRow {
+  id: string;
+  tmdb_id: number;
+  media_type: "movie" | "tv";
+  comment: string | null;
+  watch_date: string | null;
+  created_at: string;
+  movies: { title: string; poster_path: string | null; release_date: string | null } | null;
+}
+
 const ReactionIcon = ({ r }: { r: string }) => {
   if (r === "love") return <Heart className="w-4 h-4 text-primary fill-primary" />;
   if (r === "fine") return <ThumbsUp className="w-4 h-4 text-secondary" />;

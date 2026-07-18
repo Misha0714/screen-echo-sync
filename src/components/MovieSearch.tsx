@@ -69,6 +69,10 @@ const MovieSearch = ({ open, onOpenChange, onSelect, title }: MovieSearchProps) 
     haptic.light();
     onOpenChange(false);
     setSearchQuery("");
+    if (onSelect) {
+      onSelect(movie);
+      return;
+    }
     const type = movie.media_type === "tv" ? "tv" : "movie";
     navigate(`/${type}/${movie.id}`);
   };

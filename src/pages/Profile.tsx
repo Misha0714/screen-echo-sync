@@ -45,6 +45,7 @@ interface ReviewRow {
   comment: string | null;
   watch_date: string | null;
   created_at: string;
+  rewatch: boolean;
   movies: { title: string; poster_path: string | null; release_date: string | null } | null;
 }
 

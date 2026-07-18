@@ -276,7 +276,7 @@ const Discover = () => {
                   {dragOffset.x > 50 && (
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-scale-in">
                       <div className="bg-green-500/90 backdrop-blur-sm rounded-full p-6">
-                        <Heart className="w-12 h-12 text-white fill-white" />
+                        <BookmarkPlus className="w-12 h-12 text-white" />
                       </div>
                     </div>
                   )}

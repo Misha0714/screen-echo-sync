@@ -117,8 +117,19 @@ const Discover = () => {
         toast("Sign in to save to your watchlist");
       } else {
         try {
-          await toggleWatchlist(currentMovie.id, currentMovie.media_type, user.id);
-          toast.success(`Added "${title}" to watchlist`);
+          const already = await isInWatchlist(currentMovie.id, currentMovie.media_type, user.id);
+          if (already) {
+            toast(`"${title}" is already in your watchlist`);
+          } else {
+            await syncMovie(currentMovie.id, currentMovie.media_type);
+            const { error } = await supabase.from("watchlist").insert({
+              user_id: user.id,
+              tmdb_id: currentMovie.id,
+              media_type: currentMovie.media_type,
+            });
+            if (error) throw error;
+            toast.success(`Added "${title}" to watchlist`);
+          }
         } catch (e: any) {
           toast.error(e?.message || "Failed to save");
         }

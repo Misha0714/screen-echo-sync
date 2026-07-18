@@ -62,6 +62,7 @@ const Profile = () => {
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [rankings, setRankings] = useState<RankingRow[]>([]);
   const [watchlist, setWatchlist] = useState<WatchlistRow[]>([]);
+  const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [postMeta, setPostMeta] = useState<
     Record<string, { watch_date: string | null; watch_location: string | null; watched_with: string[] }>
   >({});

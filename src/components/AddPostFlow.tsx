@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Heart, ThumbsUp, ThumbsDown, Loader2, CalendarIcon } from "lucide-react";
+import { Heart, ThumbsUp, ThumbsDown, Loader2, CalendarIcon, Sliders } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -59,12 +60,15 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState<"reaction" | "compare" | "details" | "saving">("reaction");
+  const [step, setStep] = useState<"reaction" | "compare" | "manual" | "details" | "saving">("reaction");
   const [reaction, setReaction] = useState<Reaction | null>(null);
   const [bucket, setBucket] = useState<BucketMovie[]>([]);
+  const [allRankings, setAllRankings] = useState<BucketMovie[]>([]);
   const [low, setLow] = useState(0);
   const [high, setHigh] = useState(0);
   const [tieWithId, setTieWithId] = useState<string | null>(null);
+  const [manualScore, setManualScore] = useState<number>(7);
+  const [manualBucketPos, setManualBucketPos] = useState<number | null>(null);
 
   const [description, setDescription] = useState("");
   const [locationChoice, setLocationChoice] = useState<string>("");
@@ -81,6 +85,9 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
       setLow(0);
       setHigh(0);
       setTieWithId(null);
+      setManualScore(7);
+      setManualBucketPos(null);
+      setAllRankings([]);
       setDescription("");
       setLocationChoice("");
       setLocationOther("");
@@ -133,6 +140,41 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
     setStep("compare");
   };
 
+  const openManual = async () => {
+    if (!user) {
+      onOpenChange(false);
+      navigate("/auth");
+      return;
+    }
+    const { data, error } = await supabase
+      .from("user_movie_rankings")
+      .select("id, tmdb_id, media_type, score, position, reaction")
+      .eq("user_id", user.id)
+      .order("score", { ascending: false });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    const filtered = (data || []).filter(
+      (row: any) => !(row.tmdb_id === tmdbId && row.media_type === mediaType)
+    );
+    setAllRankings(filtered as any);
+    setStep("manual");
+  };
+
+  const confirmManual = () => {
+    let r: Reaction;
+    if (manualScore >= 7) r = "love";
+    else if (manualScore >= 4) r = "fine";
+    else r = "dislike";
+    setReaction(r);
+    const inBucket = allRankings.filter((row: any) => row.reaction === r);
+    const pos = inBucket.filter((row: any) => Number(row.score) > manualScore).length;
+    setManualBucketPos(pos);
+    setTieWithId(null);
+    setStep("details");
+  };
+
   const compareChoose = (choice: "new" | "existing" | "tie") => {
     const mid = Math.floor((low + high) / 2);
     if (choice === "tie") {
@@ -159,7 +201,7 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
     setStep("saving");
     try {
       await syncMovie(tmdbId, mediaType);
-      const bucketPos = bucket.length === 0 ? 0 : low;
+      const bucketPos = manualBucketPos !== null ? manualBucketPos : (bucket.length === 0 ? 0 : low);
       const location =
         locationChoice === "Other" ? locationOther.trim() || null : locationChoice || null;
 
@@ -207,6 +249,7 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
           <DialogDescription>
             {step === "reaction" && "How did you feel about it?"}
             {step === "compare" && "Which did you like more?"}
+            {step === "manual" && "Give it a score out of 10"}
             {step === "details" && "Tell us a little more"}
             {step === "saving" && "Saving..."}
           </DialogDescription>
@@ -234,6 +277,40 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
                 <div className="font-semibold">I disliked it</div>
                 <div className="text-xs text-muted-foreground">Not for me</div>
               </div>
+            </Button>
+            <Button
+              onClick={openManual}
+              variant="ghost"
+              className="mt-2 gap-2 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <Sliders className="w-4 h-4" />
+              Skip and score it out of 10
+            </Button>
+          </div>
+        )}
+
+        {step === "manual" && (
+          <div className="py-4 space-y-6">
+            <div className="text-center">
+              <div className="text-5xl font-bold text-primary tabular-nums">
+                {manualScore.toFixed(1)}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">out of 10</div>
+            </div>
+            <Slider
+              value={[manualScore]}
+              min={0}
+              max={10}
+              step={0.1}
+              onValueChange={(v) => setManualScore(v[0])}
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Disliked</span>
+              <span>Fine</span>
+              <span>Loved</span>
+            </div>
+            <Button className="w-full" size="lg" onClick={confirmManual}>
+              Continue
             </Button>
           </div>
         )}

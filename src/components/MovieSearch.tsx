@@ -18,7 +18,7 @@ interface MovieSearchProps {
   title?: string;
 }
 
-const MovieSearch = ({ open, onOpenChange }: MovieSearchProps) => {
+const MovieSearch = ({ open, onOpenChange, onSelect, title }: MovieSearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchError, setSearchError] = useState("");
   const [results, setResults] = useState<TMDBMovie[]>([]);

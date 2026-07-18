@@ -201,20 +201,62 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
     setStep("saving");
     try {
       await syncMovie(tmdbId, mediaType);
-      const bucketPos = manualBucketPos !== null ? manualBucketPos : (bucket.length === 0 ? 0 : low);
       const location =
         locationChoice === "Other" ? locationOther.trim() || null : locationChoice || null;
 
-      const { data: ranking, error: rErr } = await supabase.rpc("insert_ranking_v2", {
-        p_tmdb_id: tmdbId,
-        p_media_type: mediaType,
-        p_reaction: reaction,
-        p_bucket_position: bucketPos,
-        p_tie_with: tieWithId,
-      });
-      if (rErr) throw rErr;
+      const isManual = manualBucketPos !== null;
+      let finalScore: number | null = null;
 
-      const finalScore = (ranking as any)?.score ?? null;
+      if (isManual) {
+        // Manual slider path: use the exact score the user chose.
+        // Remove any existing ranking for this movie, insert with the manual score,
+        // then renumber positions by score desc.
+        await supabase
+          .from("user_movie_rankings")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("tmdb_id", tmdbId)
+          .eq("media_type", mediaType);
+
+        const { error: iErr } = await supabase.from("user_movie_rankings").insert({
+          user_id: user.id,
+          tmdb_id: tmdbId,
+          media_type: mediaType,
+          reaction,
+          score: manualScore,
+          position: 0,
+          tie_group: null,
+        });
+        if (iErr) throw iErr;
+
+        finalScore = manualScore;
+
+        const { data: all } = await supabase
+          .from("user_movie_rankings")
+          .select("id, score")
+          .eq("user_id", user.id)
+          .order("score", { ascending: false });
+
+        await Promise.all(
+          (all || []).map((row: any, idx: number) =>
+            supabase
+              .from("user_movie_rankings")
+              .update({ position: idx + 1 })
+              .eq("id", row.id)
+          )
+        );
+      } else {
+        const bucketPos = bucket.length === 0 ? 0 : low;
+        const { data: ranking, error: rErr } = await supabase.rpc("insert_ranking_v2", {
+          p_tmdb_id: tmdbId,
+          p_media_type: mediaType,
+          p_reaction: reaction,
+          p_bucket_position: bucketPos,
+          p_tie_with: tieWithId,
+        });
+        if (rErr) throw rErr;
+        finalScore = (ranking as any)?.score ?? null;
+      }
 
       const { error: pErr } = await supabase.from("posts").insert({
         user_id: user.id,

@@ -125,7 +125,7 @@ const Profile = () => {
 
         setRankings(enriched);
         setWatchlist((w.data as any) || []);
-        setReviews(((posts.data as any) || []).filter((p: any) => p.comment && p.comment.trim().length > 0));
+        setReviews(((posts.data as any) || []));
       }
       setLoading(false);
     })();

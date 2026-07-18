@@ -333,7 +333,7 @@ const Discover = () => {
                 className="h-20 w-20 rounded-full bg-gradient-primary hover:opacity-90"
                 onClick={() => handleSwipe("right")}
               >
-                <Heart className="w-10 h-10" />
+                <BookmarkPlus className="w-10 h-10" />
               </Button>
             </div>
 

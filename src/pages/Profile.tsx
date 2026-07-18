@@ -100,7 +100,7 @@ const Profile = () => {
             .order("added_at", { ascending: false }),
           supabase
             .from("posts")
-            .select("id, tmdb_id, media_type, comment, watch_date, watch_location, watched_with, created_at, movies(title, poster_path, release_date)")
+            .select("id, tmdb_id, media_type, comment, watch_date, watch_location, watched_with, rewatch, created_at, movies(title, poster_path, release_date)")
             .eq("user_id", profileRow.id)
             .order("created_at", { ascending: false }),
         ]);

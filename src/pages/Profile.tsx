@@ -464,6 +464,21 @@ const Profile = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {isOwnProfile && profile && (
+        <EditProfileDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          userId={profile.id}
+          currentUsername={profile.username}
+          currentBio={profile.bio || ""}
+          currentAvatarUrl={profile.avatar_url}
+          onSave={({ bio, avatar_url }) => {
+            setProfile((p) => (p ? { ...p, bio, avatar_url } : p));
+            toast({ title: "Profile updated" });
+          }}
+        />
+      )}
     </div>
 
   );

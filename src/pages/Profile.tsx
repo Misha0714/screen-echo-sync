@@ -99,8 +99,9 @@ const Profile = () => {
             .order("added_at", { ascending: false }),
           supabase
             .from("posts")
-            .select("tmdb_id, media_type, watch_date, watch_location, watched_with")
-            .eq("user_id", profileRow.id),
+            .select("id, tmdb_id, media_type, comment, watch_date, watch_location, watched_with, created_at, movies(title, poster_path, release_date)")
+            .eq("user_id", profileRow.id)
+            .order("created_at", { ascending: false }),
         ]);
 
         // Merge latest post meta (watch_date/location/with) into rankings by movie key.
@@ -123,6 +124,7 @@ const Profile = () => {
 
         setRankings(enriched);
         setWatchlist((w.data as any) || []);
+        setReviews(((posts.data as any) || []).filter((p: any) => p.comment && p.comment.trim().length > 0));
       }
       setLoading(false);
     })();

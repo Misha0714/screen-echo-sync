@@ -140,6 +140,41 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
     setStep("compare");
   };
 
+  const openManual = async () => {
+    if (!user) {
+      onOpenChange(false);
+      navigate("/auth");
+      return;
+    }
+    const { data, error } = await supabase
+      .from("user_movie_rankings")
+      .select("id, tmdb_id, media_type, score, position, reaction")
+      .eq("user_id", user.id)
+      .order("score", { ascending: false });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    const filtered = (data || []).filter(
+      (row: any) => !(row.tmdb_id === tmdbId && row.media_type === mediaType)
+    );
+    setAllRankings(filtered as any);
+    setStep("manual");
+  };
+
+  const confirmManual = () => {
+    let r: Reaction;
+    if (manualScore >= 7) r = "love";
+    else if (manualScore >= 4) r = "fine";
+    else r = "dislike";
+    setReaction(r);
+    const inBucket = allRankings.filter((row: any) => row.reaction === r);
+    const pos = inBucket.filter((row: any) => Number(row.score) > manualScore).length;
+    setManualBucketPos(pos);
+    setTieWithId(null);
+    setStep("details");
+  };
+
   const compareChoose = (choice: "new" | "existing" | "tie") => {
     const mid = Math.floor((low + high) / 2);
     if (choice === "tie") {

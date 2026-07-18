@@ -72,6 +72,29 @@ const Profile = () => {
   const [rankings, setRankings] = useState<RankingRow[]>([]);
   const [watchlist, setWatchlist] = useState<WatchlistRow[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
+  const [deleteReview, setDeleteReview] = useState<ReviewRow | null>(null);
+  const { toast } = useToast();
+
+  const handleDeleteReview = async () => {
+    if (!deleteReview || !user) return;
+    const rev = deleteReview;
+    setDeleteReview(null);
+    const { error: pErr } = await supabase.from("posts").delete().eq("id", rev.id).eq("user_id", user.id);
+    if (pErr) {
+      toast({ title: "Delete failed", description: pErr.message, variant: "destructive" });
+      return;
+    }
+    await supabase
+      .from("user_movie_rankings")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("tmdb_id", rev.tmdb_id)
+      .eq("media_type", rev.media_type);
+    await supabase.rpc("recompute_user_scores", { p_user_id: user.id });
+    setReviews((cur) => cur.filter((r) => r.id !== rev.id));
+    setRankings((cur) => cur.filter((r) => !(r.tmdb_id === rev.tmdb_id && r.media_type === rev.media_type)));
+    toast({ title: "Review deleted" });
+  };
   const [postMeta, setPostMeta] = useState<
     Record<string, { watch_date: string | null; watch_location: string | null; watched_with: string[] }>
   >({});

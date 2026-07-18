@@ -14,6 +14,8 @@ const searchSchema = z.string().trim().max(100, "Search query too long");
 interface MovieSearchProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSelect?: (movie: TMDBMovie) => void;
+  title?: string;
 }
 
 const MovieSearch = ({ open, onOpenChange }: MovieSearchProps) => {

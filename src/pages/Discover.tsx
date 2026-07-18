@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Heart, X, Info, ArrowLeft, Search, Loader2 } from "lucide-react";
+import { BookmarkPlus, X, Info, ArrowLeft, Search, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptic";
@@ -10,6 +10,7 @@ import MovieSearch from "@/components/MovieSearch";
 import { tmdb, tmdbImage, hasTmdbKey, type TMDBMovie } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { syncMovie, isInWatchlist } from "@/lib/movieSync";
 import { toggleWatchlist } from "@/lib/movieSync";
 
 type Card = TMDBMovie & {

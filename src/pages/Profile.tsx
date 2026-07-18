@@ -133,15 +133,12 @@ const Profile = () => {
   const ctrl = useProfileFilters<RankingRow>(rankings);
   const filtered = ctrl.filtered;
 
-  // Sort recent activity by watch_date desc (fallback to nothing)
-  const recentActivity = useMemo(() => {
-    return [...rankings]
-      .map((r) => ({ r, wd: postMeta[`${r.tmdb_id}-${r.media_type}`]?.watch_date }))
-      .filter((x) => x.wd)
-      .sort((a, b) => (b.wd! > a.wd! ? 1 : -1))
-      .slice(0, 8)
-      .map((x) => x.r);
-  }, [rankings, postMeta]);
+  // Lookup score by movie key for reviews.
+  const scoreByKey = useMemo(() => {
+    const m: Record<string, number> = {};
+    rankings.forEach((r) => { m[`${r.tmdb_id}-${r.media_type}`] = Number(r.score); });
+    return m;
+  }, [rankings]);
 
   if (authLoading || loading) {
     return (

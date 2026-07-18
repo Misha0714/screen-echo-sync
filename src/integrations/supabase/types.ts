@@ -172,6 +172,7 @@ export type Database = {
       user_movie_rankings: {
         Row: {
           id: string
+          locked: boolean
           media_type: Database["public"]["Enums"]["media_type"]
           position: number
           reaction: Database["public"]["Enums"]["reaction_type"]
@@ -183,6 +184,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          locked?: boolean
           media_type: Database["public"]["Enums"]["media_type"]
           position: number
           reaction: Database["public"]["Enums"]["reaction_type"]
@@ -194,6 +196,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          locked?: boolean
           media_type?: Database["public"]["Enums"]["media_type"]
           position?: number
           reaction?: Database["public"]["Enums"]["reaction_type"]
@@ -259,6 +262,7 @@ export type Database = {
         }
         Returns: {
           id: string
+          locked: boolean
           media_type: Database["public"]["Enums"]["media_type"]
           position: number
           reaction: Database["public"]["Enums"]["reaction_type"]
@@ -285,6 +289,7 @@ export type Database = {
         }
         Returns: {
           id: string
+          locked: boolean
           media_type: Database["public"]["Enums"]["media_type"]
           position: number
           reaction: Database["public"]["Enums"]["reaction_type"]

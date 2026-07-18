@@ -226,7 +226,8 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
           score: manualScore,
           position: 0,
           tie_group: null,
-        });
+          locked: true,
+        } as any);
         if (iErr) throw iErr;
 
         finalScore = manualScore;

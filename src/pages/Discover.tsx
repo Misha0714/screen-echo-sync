@@ -31,6 +31,19 @@ const Discover = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  const dismissedKey = user ? `discover_dismissed:${user.id}` : "discover_dismissed:anon";
+  const loadDismissed = (): Set<string> => {
+    try {
+      const raw = localStorage.getItem(dismissedKey);
+      return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch { return new Set(); }
+  };
+  const addDismissed = (key: string) => {
+    const s = loadDismissed();
+    s.add(key);
+    try { localStorage.setItem(dismissedKey, JSON.stringify([...s])); } catch {}
+  };
+
   useEffect(() => {
     if (!hasTmdbKey()) {
       setLoading(false);
@@ -41,7 +54,7 @@ const Discover = () => {
       setCurrentIndex(0);
       try {
         const seen = new Set<string>();
-        const exclude = new Set<string>();
+        const exclude = new Set<string>(loadDismissed());
         const out: Card[] = [];
 
         // Build seed list filtered by media type
@@ -136,6 +149,7 @@ const Discover = () => {
       }
     } else {
       haptic.medium();
+      addDismissed(`${currentMovie.media_type}:${currentMovie.id}`);
     }
     setTimeout(() => {
       setCurrentIndex((p) => p + 1);

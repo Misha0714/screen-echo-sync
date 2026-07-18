@@ -243,6 +243,40 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
                 <div className="text-xs text-muted-foreground">Not for me</div>
               </div>
             </Button>
+            <Button
+              onClick={openManual}
+              variant="ghost"
+              className="mt-2 gap-2 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <Sliders className="w-4 h-4" />
+              Skip and score it out of 10
+            </Button>
+          </div>
+        )}
+
+        {step === "manual" && (
+          <div className="py-4 space-y-6">
+            <div className="text-center">
+              <div className="text-5xl font-bold text-primary tabular-nums">
+                {manualScore.toFixed(1)}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">out of 10</div>
+            </div>
+            <Slider
+              value={[manualScore]}
+              min={0}
+              max={10}
+              step={0.1}
+              onValueChange={(v) => setManualScore(v[0])}
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Disliked</span>
+              <span>Fine</span>
+              <span>Loved</span>
+            </div>
+            <Button className="w-full" size="lg" onClick={confirmManual}>
+              Continue
+            </Button>
           </div>
         )}
 

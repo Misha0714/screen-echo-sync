@@ -87,7 +87,7 @@ const MovieSearch = ({ open, onOpenChange, onSelect, title }: MovieSearchProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle>Search Movies & TV Shows</DialogTitle>
+          <DialogTitle>{title || "Search Movies & TV Shows"}</DialogTitle>
         </DialogHeader>
 
         <div className="relative">

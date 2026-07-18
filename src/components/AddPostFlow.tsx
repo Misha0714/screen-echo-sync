@@ -85,6 +85,9 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
       setLow(0);
       setHigh(0);
       setTieWithId(null);
+      setManualScore(7);
+      setManualBucketPos(null);
+      setAllRankings([]);
       setDescription("");
       setLocationChoice("");
       setLocationOther("");

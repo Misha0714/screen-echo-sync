@@ -217,12 +217,63 @@ const Profile = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="ranked">
+        <Tabs defaultValue="reviews">
           <TabsList className="w-full">
+            <TabsTrigger value="reviews" className="flex-1">Reviews</TabsTrigger>
             <TabsTrigger value="ranked" className="flex-1">Ranked</TabsTrigger>
-            <TabsTrigger value="activity" className="flex-1">Recent</TabsTrigger>
             <TabsTrigger value="watchlist" className="flex-1">Watchlist</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="reviews" className="mt-6 space-y-3">
+            {reviews.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No reviews yet.</p>
+            ) : (
+              reviews.map((p) => {
+                const score = scoreByKey[`${p.tmdb_id}-${p.media_type}`];
+                return (
+                  <Link
+                    key={p.id}
+                    to={`/${p.media_type}/${p.tmdb_id}`}
+                    className="block p-4 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
+                  >
+                    <p className="text-xs text-muted-foreground mb-3">
+                      You watched <span className="font-semibold text-foreground">{p.movies?.title || "Untitled"}</span>
+                      {p.watch_date ? ` · ${p.watch_date}` : ""}
+                    </p>
+                    <div className="flex gap-3">
+                      {p.movies?.poster_path ? (
+                        <img
+                          src={tmdbImage(p.movies.poster_path, "w200")}
+                          alt=""
+                          className="w-16 h-24 object-cover rounded flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-16 h-24 bg-muted rounded flex-shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="font-semibold truncate">{p.movies?.title || "Untitled"}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {p.movies?.release_date?.slice(0, 4)}
+                              {p.movies?.release_date ? " · " : ""}
+                              {p.media_type === "tv" ? "TV" : "Movie"}
+                            </div>
+                          </div>
+                          {typeof score === "number" && (
+                            <div className="text-lg font-bold text-primary tabular-nums shrink-0">
+                              {score.toFixed(1)}
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-foreground/90 mt-2 whitespace-pre-wrap">{p.comment}</p>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })
+            )}
+          </TabsContent>
 
           <TabsContent value="ranked" className="mt-6">
             {editing && isOwnProfile ? (
@@ -288,33 +339,6 @@ const Profile = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="activity" className="mt-6 space-y-2">
-            {recentActivity.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No dated posts yet.</p>
-            ) : (
-              recentActivity.map((r) => {
-                const meta = postMeta[`${r.tmdb_id}-${r.media_type}`];
-                return (
-                  <Link
-                    key={r.id}
-                    to={`/${r.media_type}/${r.tmdb_id}`}
-                    className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
-                  >
-                    {r.movies?.poster_path ? (
-                      <img src={tmdbImage(r.movies.poster_path, "w200")} alt="" className="w-12 h-16 object-cover rounded" />
-                    ) : <div className="w-12 h-16 bg-muted rounded" />}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold truncate">{r.movies?.title || "Untitled"}</div>
-                      <div className="text-xs text-muted-foreground">
-                        Watched {meta?.watch_date}{meta?.watch_location ? ` · ${meta.watch_location}` : ""}
-                      </div>
-                    </div>
-                    <div className="text-lg font-bold text-primary tabular-nums">{Number(r.score).toFixed(1)}</div>
-                  </Link>
-                );
-              })
-            )}
-          </TabsContent>
 
           <TabsContent value="watchlist" className="mt-6 grid grid-cols-3 sm:grid-cols-4 gap-3">
             {watchlist.length === 0 && (

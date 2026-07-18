@@ -20,6 +20,7 @@ import { tmdbImage } from "@/lib/tmdb";
 import RankingEditor, { type EditableRanking } from "@/components/RankingEditor";
 import ProfileFilters from "@/components/ProfileFilters";
 import { useProfileFilters, type RankingForFilter } from "@/hooks/useProfileFilters";
+import EditProfileDialog from "@/components/EditProfileDialog";
 
 interface ProfileRow {
   id: string;

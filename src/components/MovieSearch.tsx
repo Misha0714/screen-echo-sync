@@ -14,9 +14,11 @@ const searchSchema = z.string().trim().max(100, "Search query too long");
 interface MovieSearchProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSelect?: (movie: TMDBMovie) => void;
+  title?: string;
 }
 
-const MovieSearch = ({ open, onOpenChange }: MovieSearchProps) => {
+const MovieSearch = ({ open, onOpenChange, onSelect, title }: MovieSearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchError, setSearchError] = useState("");
   const [results, setResults] = useState<TMDBMovie[]>([]);
@@ -67,6 +69,10 @@ const MovieSearch = ({ open, onOpenChange }: MovieSearchProps) => {
     haptic.light();
     onOpenChange(false);
     setSearchQuery("");
+    if (onSelect) {
+      onSelect(movie);
+      return;
+    }
     const type = movie.media_type === "tv" ? "tv" : "movie";
     navigate(`/${type}/${movie.id}`);
   };
@@ -81,7 +87,7 @@ const MovieSearch = ({ open, onOpenChange }: MovieSearchProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle>Search Movies & TV Shows</DialogTitle>
+          <DialogTitle>{title || "Search Movies & TV Shows"}</DialogTitle>
         </DialogHeader>
 
         <div className="relative">

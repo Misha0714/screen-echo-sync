@@ -45,6 +45,7 @@ interface ReviewRow {
   comment: string | null;
   watch_date: string | null;
   created_at: string;
+  rewatch: boolean;
   movies: { title: string; poster_path: string | null; release_date: string | null } | null;
 }
 
@@ -99,7 +100,7 @@ const Profile = () => {
             .order("added_at", { ascending: false }),
           supabase
             .from("posts")
-            .select("id, tmdb_id, media_type, comment, watch_date, watch_location, watched_with, created_at, movies(title, poster_path, release_date)")
+            .select("id, tmdb_id, media_type, comment, watch_date, watch_location, watched_with, rewatch, created_at, movies(title, poster_path, release_date)")
             .eq("user_id", profileRow.id)
             .order("created_at", { ascending: false }),
         ]);
@@ -267,6 +268,17 @@ const Profile = () => {
                           )}
                         </div>
                         <p className="text-sm text-foreground/90 mt-2 whitespace-pre-wrap">{p.comment}</p>
+                        <div className="mt-3 flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${
+                              p.rewatch
+                                ? "border-primary/40 text-primary bg-primary/10"
+                                : "border-border text-muted-foreground"
+                            }`}
+                          >
+                            {p.rewatch ? "Would rewatch" : "Wouldn't rewatch"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </Link>
@@ -274,6 +286,7 @@ const Profile = () => {
               })
             )}
           </TabsContent>
+
 
           <TabsContent value="ranked" className="mt-6">
             {editing && isOwnProfile ? (

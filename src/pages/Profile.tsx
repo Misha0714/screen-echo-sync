@@ -5,7 +5,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, LogOut, Loader2, Heart, ThumbsUp, ThumbsDown, Pencil } from "lucide-react";
+import { ArrowLeft, LogOut, Loader2, Heart, ThumbsUp, ThumbsDown, Pencil, MoreVertical, Trash2 } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { tmdbImage } from "@/lib/tmdb";
@@ -64,6 +72,29 @@ const Profile = () => {
   const [rankings, setRankings] = useState<RankingRow[]>([]);
   const [watchlist, setWatchlist] = useState<WatchlistRow[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
+  const [deleteReview, setDeleteReview] = useState<ReviewRow | null>(null);
+  const { toast } = useToast();
+
+  const handleDeleteReview = async () => {
+    if (!deleteReview || !user) return;
+    const rev = deleteReview;
+    setDeleteReview(null);
+    const { error: pErr } = await supabase.from("posts").delete().eq("id", rev.id).eq("user_id", user.id);
+    if (pErr) {
+      toast({ title: "Delete failed", description: pErr.message, variant: "destructive" });
+      return;
+    }
+    await supabase
+      .from("user_movie_rankings")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("tmdb_id", rev.tmdb_id)
+      .eq("media_type", rev.media_type);
+    await supabase.rpc("recompute_user_scores", { p_user_id: user.id });
+    setReviews((cur) => cur.filter((r) => r.id !== rev.id));
+    setRankings((cur) => cur.filter((r) => !(r.tmdb_id === rev.tmdb_id && r.media_type === rev.media_type)));
+    toast({ title: "Review deleted" });
+  };
   const [postMeta, setPostMeta] = useState<
     Record<string, { watch_date: string | null; watch_location: string | null; watched_with: string[] }>
   >({});
@@ -235,7 +266,7 @@ const Profile = () => {
                   <Link
                     key={p.id}
                     to={`/${p.media_type}/${p.tmdb_id}`}
-                    className="block p-4 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
+                    className="relative block p-4 bg-card border border-border rounded-lg hover:border-primary/40 transition-all"
                   >
                     <p className="text-xs text-muted-foreground mb-3">
                       You watched <span className="font-semibold text-foreground">{p.movies?.title || "Untitled"}</span>
@@ -283,7 +314,36 @@ const Profile = () => {
                         </div>
                       </div>
                     </div>
+                    {isOwnProfile && (
+                      <div className="absolute bottom-2 right-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                setDeleteReview(p);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete review
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    )}
                   </Link>
+
                 );
               })
             )}
@@ -374,7 +434,30 @@ const Profile = () => {
       </div>
 
       <BottomNav />
+
+      <AlertDialog open={!!deleteReview} onOpenChange={(v) => { if (!v) setDeleteReview(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this review?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will also remove{" "}
+              <span className="font-semibold">{deleteReview?.movies?.title || "this movie"}</span>{" "}
+              from your rankings.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteReview}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+
   );
 };
 

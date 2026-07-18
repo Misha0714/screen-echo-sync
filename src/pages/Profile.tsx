@@ -234,6 +234,12 @@ const Profile = () => {
           </Avatar>
           <h2 className="text-2xl font-bold">{profile.display_name || profile.username}</h2>
           <p className="text-muted-foreground mt-1">{profile.bio || "Building my movie taste."}</p>
+          {isOwnProfile && (
+            <Button variant="outline" size="sm" className="mt-3 gap-2" onClick={() => setEditOpen(true)}>
+              <Pencil className="w-3.5 h-3.5" />
+              Edit profile
+            </Button>
+          )}
 
           <div className="flex justify-center gap-8 mt-6">
             <div className="text-center">

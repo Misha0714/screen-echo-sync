@@ -201,7 +201,7 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
     setStep("saving");
     try {
       await syncMovie(tmdbId, mediaType);
-      const bucketPos = bucket.length === 0 ? 0 : low;
+      const bucketPos = manualBucketPos !== null ? manualBucketPos : (bucket.length === 0 ? 0 : low);
       const location =
         locationChoice === "Other" ? locationOther.trim() || null : locationChoice || null;
 

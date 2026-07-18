@@ -125,7 +125,7 @@ const Profile = () => {
 
         setRankings(enriched);
         setWatchlist((w.data as any) || []);
-        setReviews(((posts.data as any) || []).filter((p: any) => p.comment && p.comment.trim().length > 0));
+        setReviews(((posts.data as any) || []));
       }
       setLoading(false);
     })();
@@ -267,7 +267,9 @@ const Profile = () => {
                             </div>
                           )}
                         </div>
-                        <p className="text-sm text-foreground/90 mt-2 whitespace-pre-wrap">{p.comment}</p>
+                        {p.comment && p.comment.trim().length > 0 && (
+                          <p className="text-sm text-foreground/90 mt-2 whitespace-pre-wrap">{p.comment}</p>
+                        )}
                         <div className="mt-3 flex items-center gap-2">
                           <span
                             className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${

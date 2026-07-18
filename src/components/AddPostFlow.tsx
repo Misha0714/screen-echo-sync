@@ -214,6 +214,7 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
           <DialogDescription>
             {step === "reaction" && "How did you feel about it?"}
             {step === "compare" && "Which did you like more?"}
+            {step === "manual" && "Give it a score out of 10"}
             {step === "details" && "Tell us a little more"}
             {step === "saving" && "Saving..."}
           </DialogDescription>

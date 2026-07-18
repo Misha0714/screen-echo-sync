@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Heart, X, Info, ArrowLeft, Search, Loader2 } from "lucide-react";
+import { BookmarkPlus, X, Info, ArrowLeft, Search, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptic";
@@ -10,6 +10,7 @@ import MovieSearch from "@/components/MovieSearch";
 import { tmdb, tmdbImage, hasTmdbKey, type TMDBMovie } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { syncMovie, isInWatchlist } from "@/lib/movieSync";
 import { toggleWatchlist } from "@/lib/movieSync";
 
 type Card = TMDBMovie & {
@@ -116,8 +117,19 @@ const Discover = () => {
         toast("Sign in to save to your watchlist");
       } else {
         try {
-          await toggleWatchlist(currentMovie.id, currentMovie.media_type, user.id);
-          toast.success(`Added "${title}" to watchlist`);
+          const already = await isInWatchlist(currentMovie.id, currentMovie.media_type, user.id);
+          if (already) {
+            toast(`"${title}" is already in your watchlist`);
+          } else {
+            await syncMovie(currentMovie.id, currentMovie.media_type);
+            const { error } = await supabase.from("watchlist").insert({
+              user_id: user.id,
+              tmdb_id: currentMovie.id,
+              media_type: currentMovie.media_type,
+            });
+            if (error) throw error;
+            toast.success(`Added "${title}" to watchlist`);
+          }
         } catch (e: any) {
           toast.error(e?.message || "Failed to save");
         }
@@ -264,7 +276,7 @@ const Discover = () => {
                   {dragOffset.x > 50 && (
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-scale-in">
                       <div className="bg-green-500/90 backdrop-blur-sm rounded-full p-6">
-                        <Heart className="w-12 h-12 text-white fill-white" />
+                        <BookmarkPlus className="w-12 h-12 text-white" />
                       </div>
                     </div>
                   )}
@@ -321,7 +333,7 @@ const Discover = () => {
                 className="h-20 w-20 rounded-full bg-gradient-primary hover:opacity-90"
                 onClick={() => handleSwipe("right")}
               >
-                <Heart className="w-10 h-10" />
+                <BookmarkPlus className="w-10 h-10" />
               </Button>
             </div>
 

@@ -434,7 +434,30 @@ const Profile = () => {
       </div>
 
       <BottomNav />
+
+      <AlertDialog open={!!deleteReview} onOpenChange={(v) => { if (!v) setDeleteReview(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this review?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will also remove{" "}
+              <span className="font-semibold">{deleteReview?.movies?.title || "this movie"}</span>{" "}
+              from your rankings.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteReview}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+
   );
 };
 

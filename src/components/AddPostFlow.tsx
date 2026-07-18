@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Heart, ThumbsUp, ThumbsDown, Loader2, CalendarIcon } from "lucide-react";
+import { Heart, ThumbsUp, ThumbsDown, Loader2, CalendarIcon, Sliders } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";

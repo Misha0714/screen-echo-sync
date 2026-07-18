@@ -20,6 +20,7 @@ import { tmdbImage } from "@/lib/tmdb";
 import RankingEditor, { type EditableRanking } from "@/components/RankingEditor";
 import ProfileFilters from "@/components/ProfileFilters";
 import { useProfileFilters, type RankingForFilter } from "@/hooks/useProfileFilters";
+import EditProfileDialog from "@/components/EditProfileDialog";
 
 interface ProfileRow {
   id: string;
@@ -73,6 +74,7 @@ const Profile = () => {
   const [watchlist, setWatchlist] = useState<WatchlistRow[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [deleteReview, setDeleteReview] = useState<ReviewRow | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
   const { toast } = useToast();
 
   const handleDeleteReview = async () => {
@@ -232,6 +234,12 @@ const Profile = () => {
           </Avatar>
           <h2 className="text-2xl font-bold">{profile.display_name || profile.username}</h2>
           <p className="text-muted-foreground mt-1">{profile.bio || "Building my movie taste."}</p>
+          {isOwnProfile && (
+            <Button variant="outline" size="sm" className="mt-3 gap-2" onClick={() => setEditOpen(true)}>
+              <Pencil className="w-3.5 h-3.5" />
+              Edit profile
+            </Button>
+          )}
 
           <div className="flex justify-center gap-8 mt-6">
             <div className="text-center">
@@ -456,6 +464,21 @@ const Profile = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {isOwnProfile && profile && (
+        <EditProfileDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          userId={profile.id}
+          currentUsername={profile.username}
+          currentBio={profile.bio || ""}
+          currentAvatarUrl={profile.avatar_url}
+          onSave={({ bio, avatar_url }) => {
+            setProfile((p) => (p ? { ...p, bio, avatar_url } : p));
+            toast({ title: "Profile updated" });
+          }}
+        />
+      )}
     </div>
 
   );

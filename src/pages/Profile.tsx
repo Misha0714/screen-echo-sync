@@ -268,8 +268,29 @@ const Profile = () => {
                           )}
                         </div>
                         <p className="text-sm text-foreground/90 mt-2 whitespace-pre-wrap">{p.comment}</p>
+                        <div className="mt-3 flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${
+                              p.rewatch
+                                ? "border-primary/40 text-primary bg-primary/10"
+                                : "border-border text-muted-foreground"
+                            }`}
+                          >
+                            {p.rewatch ? "Would rewatch" : "Wouldn't rewatch"}
+                          </span>
+                        </div>
                       </div>
                     </div>
+                  </Link>
+                );
+              })
+            )}
+          </TabsContent>
+
+          <TabsContent value="ranked-old-remove" className="hidden">
+            {/* placeholder to preserve line offsets after edit */}
+          </TabsContent>
+
                   </Link>
                 );
               })

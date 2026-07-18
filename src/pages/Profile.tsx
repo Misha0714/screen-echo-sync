@@ -287,15 +287,6 @@ const Profile = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="ranked-old-remove" className="hidden">
-            {/* placeholder to preserve line offsets after edit */}
-          </TabsContent>
-
-                  </Link>
-                );
-              })
-            )}
-          </TabsContent>
 
           <TabsContent value="ranked" className="mt-6">
             {editing && isOwnProfile ? (

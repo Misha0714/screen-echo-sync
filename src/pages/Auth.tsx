@@ -94,18 +94,22 @@ const Auth = () => {
           <span className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">Rewind</span>
         </div>
         <h1 className="text-2xl font-bold text-center mb-1">
-          {mode === "signin" ? "Welcome back" : "Create your account"}
+          {mode === "signin" ? "Welcome back" : mode === "signup" ? "Create your account" : "Reset your password"}
         </h1>
         <p className="text-sm text-muted-foreground text-center mb-6">
-          Your personal movie journal.
+          {mode === "forgot" ? "Enter your email and we'll send a reset link." : "Your personal movie journal."}
         </p>
 
-        <Button onClick={google} disabled={busy} variant="outline" className="w-full mb-4">
-          Continue with Google
-        </Button>
-        <div className="flex items-center gap-2 my-4 text-xs text-muted-foreground">
-          <div className="flex-1 h-px bg-border" /> OR <div className="flex-1 h-px bg-border" />
-        </div>
+        {mode !== "forgot" && (
+          <>
+            <Button onClick={google} disabled={busy} variant="outline" className="w-full mb-4">
+              Continue with Google
+            </Button>
+            <div className="flex items-center gap-2 my-4 text-xs text-muted-foreground">
+              <div className="flex-1 h-px bg-border" /> OR <div className="flex-1 h-px bg-border" />
+            </div>
+          </>
+        )}
 
         <form onSubmit={submit} className="space-y-3">
           {mode === "signup" && (
@@ -118,24 +122,41 @@ const Auth = () => {
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
-          <div>
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-          </div>
+          {mode !== "forgot" && (
+            <div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                {mode === "signin" && (
+                  <button type="button" className="text-xs text-primary hover:underline" onClick={() => setMode("forgot")}>
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            </div>
+          )}
           <Button type="submit" disabled={busy} className="w-full">
             {busy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {mode === "signin" ? "Sign in" : "Create account"}
+            {mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}
           </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground mt-4">
-          {mode === "signin" ? "New here?" : "Already have an account?"}{" "}
-          <button
-            className="text-primary hover:underline"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          >
-            {mode === "signin" ? "Create an account" : "Sign in"}
-          </button>
+          {mode === "forgot" ? (
+            <button className="text-primary hover:underline" onClick={() => setMode("signin")}>
+              Back to sign in
+            </button>
+          ) : (
+            <>
+              {mode === "signin" ? "New here?" : "Already have an account?"}{" "}
+              <button
+                className="text-primary hover:underline"
+                onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              >
+                {mode === "signin" ? "Create an account" : "Sign in"}
+              </button>
+            </>
+          )}
         </p>
       </Card>
     </div>

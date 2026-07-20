@@ -46,22 +46,27 @@ const Auth = () => {
     e.preventDefault();
     setBusy(true);
     try {
-      if (mode === "signup") {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth`,
+        });
+        if (error) throw error;
+        toast({ title: "Check your email", description: "We sent a password reset link." });
+        setMode("signin");
+      } else if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { username },
-          },
+          options: { emailRedirectTo: window.location.origin, data: { username } },
         });
         if (error) throw error;
         toast({ title: "Welcome!", description: "Account created." });
+        navigate("/", { replace: true });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        navigate("/", { replace: true });
       }
-      navigate("/", { replace: true });
     } catch (err: any) {
       toast({ title: "Auth failed", description: err.message, variant: "destructive" });
     } finally {

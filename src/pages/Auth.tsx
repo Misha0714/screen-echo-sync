@@ -14,11 +14,29 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, loading } = useAuth();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Handle password recovery link
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.includes("type=recovery")) {
+      const newPassword = window.prompt("Enter your new password (min 6 characters):");
+      if (newPassword && newPassword.length >= 6) {
+        supabase.auth.updateUser({ password: newPassword }).then(({ error }) => {
+          if (error) {
+            toast({ title: "Reset failed", description: error.message, variant: "destructive" });
+          } else {
+            toast({ title: "Password updated", description: "You can now sign in." });
+            window.location.hash = "";
+          }
+        });
+      }
+    }
+  }, [toast]);
 
   useEffect(() => {
     if (!loading && user) navigate("/", { replace: true });

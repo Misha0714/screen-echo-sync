@@ -55,6 +55,7 @@ interface ReviewRow {
   watch_date: string | null;
   created_at: string;
   rewatch: boolean;
+  season_ranking?: number[] | null;
   movies: { title: string; poster_path: string | null; release_date: string | null } | null;
 }
 
@@ -133,7 +134,7 @@ const Profile = () => {
             .order("added_at", { ascending: false }),
           supabase
             .from("posts")
-            .select("id, tmdb_id, media_type, comment, watch_date, watch_location, watched_with, rewatch, created_at, movies(title, poster_path, release_date)")
+            .select("id, tmdb_id, media_type, comment, watch_date, watch_location, watched_with, rewatch, season_ranking, created_at, movies(title, poster_path, release_date)")
             .eq("user_id", profileRow.id)
             .order("created_at", { ascending: false }),
         ]);
@@ -308,6 +309,21 @@ const Profile = () => {
                         </div>
                         {p.comment && p.comment.trim().length > 0 && (
                           <p className="text-sm text-foreground/90 mt-2 whitespace-pre-wrap">{p.comment}</p>
+                        )}
+                        {p.media_type === "tv" && p.season_ranking && p.season_ranking.length > 0 && (
+                          <div className="mt-3 rounded-md border border-border bg-muted/30 p-2">
+                            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                              Season ranking · best to worst
+                            </div>
+                            <ol className="text-xs text-foreground/90 space-y-0.5">
+                              {p.season_ranking.map((n, i) => (
+                                <li key={n} className="tabular-nums">
+                                  <span className="text-muted-foreground mr-2">{i + 1}.</span>
+                                  Season {n}
+                                </li>
+                              ))}
+                            </ol>
+                          </div>
                         )}
                         <div className="mt-3 flex items-center gap-2">
                           <span

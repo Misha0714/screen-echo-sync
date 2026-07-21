@@ -42,6 +42,17 @@ export interface TMDBMovieDetails extends TMDBMovie {
   "watch/providers"?: {
     results: Record<string, { flatrate?: { provider_id: number; provider_name: string }[] }>;
   };
+  seasons?: TMDBSeason[];
+}
+
+export interface TMDBSeason {
+  id: number;
+  season_number: number;
+  name: string;
+  overview: string;
+  air_date: string | null;
+  episode_count: number;
+  poster_path: string | null;
 }
 
 async function tmdbFetch<T>(path: string, params: Record<string, string | number | boolean> = {}): Promise<T> {

@@ -310,6 +310,21 @@ const Profile = () => {
                         {p.comment && p.comment.trim().length > 0 && (
                           <p className="text-sm text-foreground/90 mt-2 whitespace-pre-wrap">{p.comment}</p>
                         )}
+                        {p.media_type === "tv" && p.season_ranking && p.season_ranking.length > 0 && (
+                          <div className="mt-3 rounded-md border border-border bg-muted/30 p-2">
+                            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                              Season ranking · best to worst
+                            </div>
+                            <ol className="text-xs text-foreground/90 space-y-0.5">
+                              {p.season_ranking.map((n, i) => (
+                                <li key={n} className="tabular-nums">
+                                  <span className="text-muted-foreground mr-2">{i + 1}.</span>
+                                  Season {n}
+                                </li>
+                              ))}
+                            </ol>
+                          </div>
+                        )}
                         <div className="mt-3 flex items-center gap-2">
                           <span
                             className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${

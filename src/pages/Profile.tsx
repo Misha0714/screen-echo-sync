@@ -55,6 +55,7 @@ interface ReviewRow {
   watch_date: string | null;
   created_at: string;
   rewatch: boolean;
+  season_ranking?: number[] | null;
   movies: { title: string; poster_path: string | null; release_date: string | null } | null;
 }
 

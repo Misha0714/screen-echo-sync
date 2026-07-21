@@ -77,6 +77,7 @@ const Profile = () => {
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [deleteReview, setDeleteReview] = useState<ReviewRow | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<ReviewRow | null>(null);
   const { toast } = useToast();
 
   const handleDeleteReview = async () => {

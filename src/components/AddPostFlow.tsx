@@ -97,6 +97,8 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
       setWatchedWith([]);
       setWatchDate(new Date());
       setRewatch(false);
+      setSeasonOrder([]);
+      setIncludeSeasonRanking(true);
     }
   }, [open]);
 

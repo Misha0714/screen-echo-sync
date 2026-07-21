@@ -264,6 +264,26 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
         finalScore = (ranking as any)?.score ?? null;
       }
 
+      const savedSeasonOrder =
+        mediaType === "tv" && includeSeasonRanking ? seasonOrder : [];
+
+      if (mediaType === "tv" && includeSeasonRanking && seasonOrder.length > 0) {
+        // Persist this user's season ranking for the show (upsert full ordering)
+        await supabase
+          .from("user_tv_season_rankings")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("tmdb_id", tmdbId);
+        await supabase.from("user_tv_season_rankings").insert(
+          seasonOrder.map((season_number, idx) => ({
+            user_id: user.id,
+            tmdb_id: tmdbId,
+            season_number,
+            position: idx,
+          }))
+        );
+      }
+
       const { error: pErr } = await supabase.from("posts").insert({
         user_id: user.id,
         tmdb_id: tmdbId,
@@ -276,6 +296,7 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
         watch_date: watchDate ? format(watchDate, "yyyy-MM-dd") : null,
         watch_location: location,
         watched_with: watchedWith,
+        season_ranking: savedSeasonOrder,
       });
       if (pErr) throw pErr;
 

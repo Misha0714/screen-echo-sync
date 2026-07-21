@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, LogOut, Loader2, Heart, ThumbsUp, ThumbsDown, Pencil, MoreVertical, Trash2 } from "lucide-react";
+import EditPostDialog from "@/components/EditPostDialog";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -76,6 +77,7 @@ const Profile = () => {
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [deleteReview, setDeleteReview] = useState<ReviewRow | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<ReviewRow | null>(null);
   const { toast } = useToast();
 
   const handleDeleteReview = async () => {
@@ -353,6 +355,15 @@ const Profile = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                             <DropdownMenuItem
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                setEditingPost(p);
+                              }}
+                            >
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Edit post
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                               className="text-destructive focus:text-destructive"
                               onSelect={(e) => {
                                 e.preventDefault();
@@ -495,6 +506,15 @@ const Profile = () => {
           }}
         />
       )}
+
+      <EditPostDialog
+        open={!!editingPost}
+        onOpenChange={(v) => { if (!v) setEditingPost(null); }}
+        post={editingPost as any}
+        onSaved={(updated) => {
+          setReviews((cur) => cur.map((r) => (r.id === updated.id ? ({ ...r, ...updated } as unknown as ReviewRow) : r)));
+        }}
+      />
     </div>
 
   );

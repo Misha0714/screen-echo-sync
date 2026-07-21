@@ -22,6 +22,7 @@ import { tmdbImage } from "@/lib/tmdb";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import FollowersPicker from "@/components/FollowersPicker";
+import SeasonRankingEditor from "@/components/SeasonRankingEditor";
 
 type Reaction = "love" | "fine" | "dislike";
 

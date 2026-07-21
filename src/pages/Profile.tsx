@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, LogOut, Loader2, Heart, ThumbsUp, ThumbsDown, Pencil, MoreVertical, Trash2 } from "lucide-react";
+import EditPostDialog from "@/components/EditPostDialog";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";

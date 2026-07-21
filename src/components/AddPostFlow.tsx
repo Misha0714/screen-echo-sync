@@ -77,6 +77,8 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
   const [watchedWith, setWatchedWith] = useState<string[]>([]);
   const [watchDate, setWatchDate] = useState<Date | undefined>(new Date());
   const [rewatch, setRewatch] = useState(false);
+  const [seasonOrder, setSeasonOrder] = useState<number[]>([]);
+  const [includeSeasonRanking, setIncludeSeasonRanking] = useState(true);
 
   useEffect(() => {
     if (!open) {

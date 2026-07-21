@@ -89,6 +89,7 @@ export type Database = {
           media_type: Database["public"]["Enums"]["media_type"]
           reaction: Database["public"]["Enums"]["reaction_type"]
           rewatch: boolean
+          season_ranking: number[]
           tags: string[]
           tmdb_id: number
           updated_at: string
@@ -105,6 +106,7 @@ export type Database = {
           media_type: Database["public"]["Enums"]["media_type"]
           reaction: Database["public"]["Enums"]["reaction_type"]
           rewatch?: boolean
+          season_ranking?: number[]
           tags?: string[]
           tmdb_id: number
           updated_at?: string
@@ -121,6 +123,7 @@ export type Database = {
           media_type?: Database["public"]["Enums"]["media_type"]
           reaction?: Database["public"]["Enums"]["reaction_type"]
           rewatch?: boolean
+          season_ranking?: number[]
           tags?: string[]
           tmdb_id?: number
           updated_at?: string
@@ -215,6 +218,36 @@ export type Database = {
             referencedColumns: ["tmdb_id", "media_type"]
           },
         ]
+      }
+      user_tv_season_rankings: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          season_number: number
+          tmdb_id: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position: number
+          season_number: number
+          tmdb_id: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          season_number?: number
+          tmdb_id?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       watchlist: {
         Row: {

@@ -355,6 +355,15 @@ const Profile = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                             <DropdownMenuItem
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                setEditingPost(p);
+                              }}
+                            >
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Edit post
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                               className="text-destructive focus:text-destructive"
                               onSelect={(e) => {
                                 e.preventDefault();

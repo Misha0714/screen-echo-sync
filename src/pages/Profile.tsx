@@ -512,7 +512,7 @@ const Profile = () => {
         onOpenChange={(v) => { if (!v) setEditingPost(null); }}
         post={editingPost as any}
         onSaved={(updated) => {
-          setReviews((cur) => cur.map((r) => (r.id === updated.id ? { ...r, ...updated } as ReviewRow : r)));
+          setReviews((cur) => cur.map((r) => (r.id === updated.id ? { ...r, ...updated } : r)));
         }}
       />
     </div>

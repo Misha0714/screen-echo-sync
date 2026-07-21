@@ -491,10 +491,36 @@ const AddPostFlow = ({ open, onOpenChange, tmdbId, mediaType, title, posterPath 
               <FollowersPicker value={watchedWith} onChange={setWatchedWith} />
             </div>
 
+            {mediaType === "tv" && user && (
+              <div className="space-y-3 rounded-lg border border-border p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="cursor-pointer">Include season ranking</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Drag to order best to worst. Shown alongside your post.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={includeSeasonRanking}
+                    onCheckedChange={setIncludeSeasonRanking}
+                  />
+                </div>
+                {includeSeasonRanking && (
+                  <SeasonRankingEditor
+                    userId={user.id}
+                    tmdbId={tmdbId}
+                    value={seasonOrder}
+                    onChange={setSeasonOrder}
+                  />
+                )}
+              </div>
+            )}
+
             <div className="flex items-center justify-between rounded-lg border border-border p-3">
               <Label htmlFor="rewatch" className="cursor-pointer">Would you rewatch?</Label>
               <Switch id="rewatch" checked={rewatch} onCheckedChange={setRewatch} />
             </div>
+
 
             <Button onClick={save} className="w-full" size="lg">Save post</Button>
           </div>
